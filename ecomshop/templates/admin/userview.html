@@ -1,0 +1,57 @@
+{% extends "admin/base.html" %}
+{% load static %}
+{% block content %}
+
+
+
+
+<h2 style="color: #00dbde;font-weight: bold">Dashboard</h2>
+<section class="container">
+    <table class="table table-bordered">
+  <thead>
+    <tr>
+      <th scope="col">Id</th>
+      <th scope="col">First Name</th>
+      <th scope="col">Last Name</th>
+      <th scope="col">Username</th>
+        <th scope="col">Email</th>
+        <th scope="col">Phone Number</th>
+        <th scope="col">Status</th>
+        <th scope="col">Edit</th>
+        <th scope="col">Delete</th>
+
+
+  </thead>
+  <tbody>
+  {% for us in user %}
+    <tr>
+      <th scope="row">{{ us.id }}</th>
+    <th scope="row">{{ us.first_name }}</th>
+    <th scope="row">{{ us.last_name }}</th>
+    <th scope="row">{{ us.username}}</th>
+    <th scope="row">{{ us.email }}</th>
+    <th scope="row">{{ us.phone_number }}</th>
+    <th>
+                  <form  method="post">
+                  {% csrf_token %}
+                    {% if us.is_active == True  %}
+                    <a CLASS="btn btn-outline-success" href="{% url 'ecom_admin:block_user' us.id %}">Active</a>
+                    {% else %}
+                    <a class="btn btn-outline-danger"  href="{% url 'ecom_admin:block_user' us.id %}">Not Active</a>
+                    {% endif %}
+                  </form>
+              </th>
+              <th> <button type="button"  class="btn btn-info"><a style="text-decoration: none; color: white;" href="{% url 'ecom_admin:edit_user' us.id %}">Edit User</a></button></th>
+              <th> <button type="button"  class="btn btn-danger"><a style="text-decoration: none; color: white;" href="{% url 'ecom_admin:delete_user' us.username %}">Delete User</a></button></th>
+            </tr>
+
+    </tr>
+    {% endfor %}
+  <a class="btn btn-info" href="{% url 'ecom_admin:admin_logout' %}">Logout</a>
+ <a href="{% url 'ecom_admin:add_user' %}"><button class="btn btn-outline-dark">Add User</button></a>
+
+  </tbody>
+</table>
+</section>
+
+{% endblock content %}

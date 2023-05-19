@@ -1,0 +1,38 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+  <div class="container mt-4">
+    <div class="row">
+      <div class="col-md-6">
+        <img src="{{ product.image1.url }}" class="img-fluid">
+      </div>
+      <div class="col-md-6">
+        <h2>{{ product.name }}</h2>
+        <p class="lead">{{ product.description }}</p>
+        <h3>Price: ${{ product.price }}</h3>
+        <p><strong>Stock Quantity:</strong> {{ product.stock_quantity }}</p>
+        <p><strong>Category:</strong> {{ product.category }}</p>
+        <a href="{% url 'ecom_admin:edit_product' pk=product.pk %}" class="btn btn-primary">Edit Product</a>
+        <a href="{% url 'ecom_admin:product_list' %}" class="btn btn-secondary ml-2">Product List</a>
+      </div>
+    </div>
+    <hr>
+    <div class="row">
+      {% if product.image2 %}
+      <div class="col-md-3">
+        <img src="{{ product.image2.url }}" class="img-fluid">
+      </div>
+      {% endif %}
+      {% if product.image3 %}
+      <div class="col-md-3">
+        <img src="{{ product.image3.url }}" class="img-fluid">
+      </div>
+      {% endif %}
+      {% if product.image4 %}
+      <div class="col-md-3">
+        <img src="{{ product.image4.url }}" class="img-fluid">
+      </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

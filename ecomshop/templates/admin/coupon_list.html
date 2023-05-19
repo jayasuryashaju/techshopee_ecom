@@ -1,0 +1,49 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+  <h1 class="mb-4">Coupons</h1>
+
+  {% if coupons %}
+    <div class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Description</th>
+            <th>Discount Value</th>
+            <th>Minimum Purchase</th>
+            <th>Maximum Discount</th>
+            <th>Valid From</th>
+            <th>Valid To</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for coupon in coupons %}
+            <tr>
+              <td>{{ coupon.code }}</td>
+              <td>{{ coupon.description }}</td>
+              <td>{{ coupon.discount_value }}</td>
+              <td>{{ coupon.minimum_purchase }}</td>
+              <td>{{ coupon.maximum_discount }}</td>
+              <td>{{ coupon.valid_from|date:"M d, Y" }}</td>
+              <td>{{ coupon.valid_to|date:"M d, Y" }}</td>
+              <td>
+                <div class="d-flex">
+                  <a href="{% url 'ecom_admin:edit_coupon' coupon.pk %}" class="btn btn-sm btn-primary me-2">Edit</a>
+                  <a href="{% url 'ecom_admin:delete_coupon' coupon.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p>No active coupons.</p>
+  {% endif %}
+
+  <a href="{% url 'ecom_admin:add_coupon' %}" class="btn btn-primary mt-4">Add Coupon</a>
+{% endblock %}
+
+

@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+    <main class="main">
+        <div class="page-header text-center" style="background-image: url({% static 'assets/images/page-header-bg.jpg' %})">
+            <div class="container">
+                {% if products %}
+                    <h1 class="page-title">Category<span>{{ products.0.category }}</span></h1>
+                {% endif %}
+            </div><!-- End .container -->
+        </div><!-- End .page-header -->
+        <nav aria-label="breadcrumb" class="breadcrumb-nav mb-2">
+            <div class="container">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'homelog:home' %}">Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ products.0.category }}</li>
+                </ol>
+            </div><!-- End .container -->
+        </nav><!-- End .breadcrumb-nav -->
+        <!-- here nav_______________________________________________________________________________________________________________________ -->
+        <div class="page-content">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-9">
+                        <div class="toolbox">
+                            <div class="toolbox-left">
+                                <div class="toolbox-info">
+                                    Showing <span>{{ num_products_shown }}</span> of <span>{{ total_products }}</span> Products
+                                </div><!-- End .toolbox-info -->
+                            </div><!-- End .toolbox-left -->
+                            <div class="toolbox-right">
+                                <div class="toolbox-sort">
+{#                                    <label for="sortby">Sort by:</label>#}
+{#                                    <div class="select-custom">#}
+{#                                        <select name="sortby" id="sortby" class="form-control">#}
+{#                                            <option value="popularity" selected="selected">Most Popular</option>#}
+{#                                            <option value="rating">Most Rated</option>#}
+{#                                            <option value="date">Date</option>#}
+{#                                        </select>#}
+{#                                    </div>#}
+                                </div><!-- End .toolbox-sort -->
+                            </div><!-- End .toolbox-right -->
+                        </div><!-- End .toolbox -->
+
+                        <div class="products mb-3">
+                            {% for product in products %}
+                            <div class="product product-list">
+                                <div class="row">
+                                    <div class="col-6 col-lg-3">
+                                        <figure class="product-media" style="background-color: white;">
+                                            <a href="{% url 'products:product_view' product_id=product.id %}">
+                                                <img src="{{ product.image1.url }}" alt="{{ product.name }}" class="product-image" style="width: 218px; height: 218px; object-fit: contain;">
+                                            </a>
+                                        </figure><!-- End .product-media -->
+                                    </div><!-- End .col-sm-6 col-lg-3 -->
+
+
+
+
+                                    <div class="col-6 col-lg-3 order-lg-last">
+                                        <div class="product-list-action">
+                                            <div class="product-price">
+                                                ${{ product.price }}
+                                            </div><!-- End .product-price -->
+                                            <div class="ratings-container">
+                                                <div class="ratings">
+                                                    <div class="ratings-val" style="width: 20%;"></div><!-- End .ratings-val -->
+                                                </div><!-- End .ratings -->
+                                                <span class="ratings-text">( 2 Reviews )</span>
+                                            </div><!-- End .rating-container -->
+                                            {% if user.is_authenticated and product.stock_quantity != 0 %}
+                                            <form method="post" action="{% url 'cart:add_to_cart' product.id %}" id="add-to-cart-form">
+                                                {% csrf_token %}
+{#                                            <a href="#" class="btn-product btn-cart"><span>add to cart</span></a>#}
+{#                                               <a class="btn-product btn-cart" style="font-size: small"><button style="" ></button>add to cart</a>#}
+                                            <button class="btn btn-product btn-cart" style="font-size: medium">add to cart</button>
+                                            </form>
+                                            {% elif product.stock_quantity == 0 %}
+                                            <p class="out-of-stock">Item is Out of Stock</p>
+                                            {% else %}
+{#                                            <a href="{% url 'account:user_signin' %}?next={% url 'cart:add_to_cart' product.id  %}" class="btn-product btn-cart"><span>Add to Cart</span></a>#}
+                                                <form action="{% url 'account:user_signin' %}?next={% url 'cart:add_to_cart' product.id  %}">
+                                            <button  class="btn btn-product btn-cart" style="font-size: medium">add to cart</button>
+                                                </form>
+                                            {% endif %}
+                                        </div><!-- End .product-list-action -->
+                                    </div><!-- End .col-sm-6 col-lg-3 -->
+
+                                    <div class="col-lg-6">
+                                        <div class="product-body product-action-inner">
+                                            <h3 class="product-title"><a href="{% url 'products:product_view' product_id=product.id %}">{{ product.name }}</a></h3><!-- End .product-title -->
+
+                                            <div class="product-content">
+                                                <p>{{ product.description|slice:":150" }} </p>
+                                            </div><!-- End .product-content -->
+
+                                        </div><!-- End .product-body -->
+                                    </div><!-- End .col-lg-6 -->
+                                </div><!-- End .row -->
+                            </div><!-- End .product -->
+                             {% empty %}
+                                <h6>No products found</h6>
+                        {% endfor %}
+                        </div><!-- End .products -->
+
+                        {% if products.has_other_pages %}
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination">
+                                    {% if products.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ products.previous_page_number }}" aria-label="Previous">
+                                            <span aria-hidden="true"><i class="icon-long-arrow-left"></i></span>Prev
+                                        </a>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link" aria-label="Previous">
+                                            <span aria-hidden="true"><i class="icon-long-arrow-left"></i></span>Prev
+                                        </span>
+                                    </li>
+                                    {% endif %}
+
+                                    {% for i in products.paginator.page_range %}
+                                        {% if products.number == i %}
+                                            <li class="page-item active" aria-current="page">
+                                                <span class="page-link">{{ i }}</span>
+                                            </li>
+                                        {% else %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% if products.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ products.next_page_number }}" aria-label="Next">
+                                            Next <span aria-hidden="true"><i class="icon-long-arrow-right"></i></span>
+                                        </a>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link" aria-label="Next">
+                                            Next <span aria-hidden="true"><i class="icon-long-arrow-right"></i></span>
+                                        </span>
+                                    </li>
+                                    {% endif %}
+                                    <li class="page-item-total">of {{ products.paginator.num_pages }}</li>
+                                </ul>
+                            </nav>
+                        {% endif %}
+
+                    </div><!-- End .col-lg-9 -->
+                    <aside class="col-lg-3 order-lg-first">
+                        <div class="sidebar sidebar-shop">
+                            <div class="widget widget-clean">
+                                <label>Filters:</label>
+                                <a href="#" class="sidebar-filter-clear">Clean All</a>
+                            </div><!-- End .widget widget-clean -->
+
+                            <div class="widget">
+                                <h3 class="widget-title">
+                                    <a data-toggle="collapse" href="#widget-1" role="button" aria-expanded="true" aria-controls="widget-1">
+                                        Category
+                                    </a>
+                                </h3><!-- End .widget-title -->
+
+                                <div class="collapse show" id="widget-1">
+
+                                    <div class="widget-body">
+                                     {% for category in categories %}
+                                        <div class="filter-items filter-items-count">
+
+                                            <div class="filter-item">
+
+                                                <div class="custom-control custom-checkbox">
+
+                                                    <input type="checkbox" class="custom-control-input" id="cat-1">
+                                                    <label class="custom-control-label" for="cat-1">{{ category }}</label>
+
+                                                </div><!-- End .custom-checkbox -->
+{#                                                <span class="item-count">3</span>#}
+
+                                            </div><!-- End .filter-item -->
+
+                                        </div><!-- End .filter-items -->
+                                        {% endfor %}
+                                    </div><!-- End .widget-body -->
+
+                                </div><!-- End .collapse -->
+                            </div><!-- End .widget -->
+
+{#                            <div class="widget widget-collapsible">#}
+{#                                <h3 class="widget-title">#}
+{#                                    <a data-toggle="collapse" href="#widget-4" role="button" aria-expanded="true" aria-controls="widget-4">#}
+{#                                        Brand#}
+{#                                    </a>#}
+{#                                </h3><!-- End .widget-title -->#}
+
+{#                                <div class="collapse show" id="widget-4">#}
+{#                                    <div class="widget-body">#}
+{#                                        <div class="filter-items">#}
+{#                                            <div class="filter-item">#}
+{#                                                <div class="custom-control custom-checkbox">#}
+{#                                                    <input type="checkbox" class="custom-control-input" id="brand-1">#}
+{#                                                    <label class="custom-control-label" for="brand-1">Next</label>#}
+{#                                                </div><!-- End .custom-checkbox -->#}
+{#                                            </div><!-- End .filter-item -->#}
+{#                                        </div><!-- End .filter-items -->#}
+{#                                    </div><!-- End .widget-body -->#}
+{#                                </div><!-- End .collapse -->#}
+{#                            </div><!-- End .widget -->#}
+
+{#                            <div class="widget widget-collapsible">#}
+{#                                <h3 class="widget-title">#}
+{#                                    <a data-toggle="collapse" href="#widget-5" role="button" aria-expanded="true" aria-controls="widget-5">#}
+{#                                        Price#}
+{#                                    </a>#}
+{#                                </h3><!-- End .widget-title -->#}
+{##}
+{#                                <div class="collapse show" id="widget-5">#}
+{#                                    <div class="widget-body">#}
+{#                                        <div class="filter-price">#}
+{#                                            <div class="filter-price-text">#}
+{#                                                Price Range:#}
+{#                                                <span id="filter-price-range"></span>#}
+{#                                            </div><!-- End .filter-price-text -->#}
+{##}
+{#                                            <div id="price-slider"></div><!-- End #price-slider -->#}
+{#                                        </div><!-- End .filter-price -->#}
+{#                                    </div><!-- End .widget-body -->#}
+{#                                </div><!-- End .collapse -->#}
+{#                            </div><!-- End .widget -->#}
+                        </div><!-- End .sidebar sidebar-shop -->
+                    </aside><!-- End .col-lg-3 -->
+                </div><!-- End .row -->
+            </div><!-- End .container -->
+        </div><!-- End .page-content -->
+    </main>
+
+
+    <script>
+$(document).on('submit', '#add-to-cart-form', function(event) {
+  event.preventDefault();
+  $.ajax({
+    url: $(this).attr('action'),
+    type: 'POST',
+    data: $(this).serialize(),
+    success: function(response) {
+      Swal.fire({
+        title: 'Added to Cart',
+        text: '{{ product.name }} has been added to your cart.',
+        icon: 'success',
+        showCancelButton: true,
+        confirmButtonText: 'View Cart',
+        cancelButtonText: 'Continue Shopping'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = '{% url "cart:cart_detail" %}';
+        }
+
+        else {
+            location.reload()
+        }
+      });
+    },
+    error: function(xhr, errmsg, err) {
+      console.log(xhr.status + ': ' + xhr.responseText);
+    }
+  });
+});
+</script>
+
+
+{% endblock %}

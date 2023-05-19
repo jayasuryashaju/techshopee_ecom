@@ -1,0 +1,240 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+{% block content %}
+{#    <main class="main-wrap">#}
+        <section class="content-main">
+            <div class="content-header">
+                <div>
+                    <h2 class="content-title card-title">Dashboard </h2>
+                    <p>Whole data about your business here</p>
+                </div>
+                <div>
+                    <a href="{% url 'ecom_admin:sales_report' %}" class="btn btn-primary"><i class="text-muted material-icons md-post_add"></i>Create report</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-3">
+                    <div class="card card-body mb-4">
+                        <article class="icontext">
+                            <span class="icon icon-sm rounded-circle bg-primary-light"><i class="text-primary material-icons md-monetization_on"></i></span>
+                            <div class="text">
+                                <h6 class="mb-1 card-title">Revenue</h6>
+                                <span>${{ total_revenue }}</span>
+{#                                <span class="text-sm">#}
+{#                                    Shipping fees are not included#}
+{#                                </span>#}
+                            </div>
+                        </article>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="card card-body mb-4">
+                        <article class="icontext">
+                            <span class="icon icon-sm rounded-circle bg-success-light"><i class="text-success material-icons md-local_shipping"></i></span>
+                            <div class="text">
+                                <h6 class="mb-1 card-title">Orders</h6> <span>{{ number_of_orders }}</span>
+{#                                <span class="text-sm">#}
+{#                                    Excluding orders in transit#}
+{#                                </span>#}
+                            </div>
+                        </article>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="card card-body mb-4">
+                        <article class="icontext">
+                            <span class="icon icon-sm rounded-circle bg-warning-light"><i class="text-warning material-icons md-qr_code"></i></span>
+                            <div class="text">
+                                <h6 class="mb-1 card-title">Products</h6> <span>{{ number_of_products }}</span>
+                                <span class="text-sm">
+                                    In {{ number_of_categories }} Categories
+                                </span>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="card card-body mb-4">
+                        <article class="icontext">
+                            <span class="icon icon-sm rounded-circle bg-info-light"><i class="text-info material-icons md-shopping_basket"></i></span>
+                            <div class="text">
+                                <h6 class="mb-1 card-title">Monthly Earning</h6> <span>${{ total_revenue_this_month }}</span>
+                                <span class="text-sm">
+                                    Based in your local time.
+                                </span>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-8 col-lg-12">
+                    <div class="card mb-4">
+{#                        <article class="card-body">#}
+{#                            <h5 class="card-title">Sale statistics</h5>#}
+{#                            <canvas id="myChart" height="120px"></canvas>#}
+{#                            <canvas id="statusChart"></canvas>#}
+{#                            <div class="chartjs-wrapper mt-5">#}
+{#                          <canvas id="most-moving-product" height="120px"></canvas>#}
+{#                        </div>#}
+{#                        </article>#}
+                        <div class="card-body">
+                        <div class="d-sm-flex justify-content-between align-items-start">
+                          <div>
+                            <h4 class="card-title card-title-dash">Most Moving Product</h4>
+                          </div>
+                          <div>
+
+                          </div>
+                        </div>
+                        <div class="d-sm-flex align-items-center mt-1 justify-content-between">
+                          <div class="d-sm-flex align-items-center mt-4 justify-content-between"><h2 class="me-2 fw-bold"></h2><h4 class="me-2"></h4><h4 class="text-success"></h4></div>
+                          <div class="me-3"><div id="marketing-overview-legend"></div></div>
+                        </div>
+                        <div class="chartjs-bar-wrapper mt-3">
+                          <canvas id="most_moving_product" height="110" ></canvas>
+                        </div>
+                      </div>
+{#                        <div class="chartjs-bar-wrapper mt-3">#}
+{#                          <canvas id="most-moving-product"></canvas>#}
+{#                        </div>#}
+                    </div>
+
+                </div>
+                <div class="col-xl-4 col-lg-12">
+                    <div class="card mb-4">
+                        <article class="card-body">
+                            <h5 class="card-title">Sales</h5>
+{#                            <canvas id="myChart2" height="217"></canvas>#}
+                            <canvas class="my-auto" id="status_count" height="217"></canvas>
+
+                        </article>
+                    </div>
+                </div>
+            </div>
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <div class="table-responsive">
+                            <table class="table align-middle table-nowrap mb-0">
+                                <thead class="table-light">
+                                    <tr>
+
+                                        <th class="align-middle" scope="col">Order ID</th>
+                                        <th class="align-middle" scope="col">Billing Name</th>
+                                        <th class="align-middle" scope="col">Date</th>
+                                        <th class="align-middle" scope="col">Total</th>
+                                        <th class="align-middle" scope="col">Status</th>
+                                        <th class="align-middle" scope="col">Payment Method</th>
+                                        <th class="align-middle" scope="col">View Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in orders %}
+                                    <tr>
+                                        <td><a href="{% url 'ecom_admin:order_details_product' order.id %}" class="fw-bold">#{{ order.id }}</a> </td>
+                                        <td>{{ order.user.full_name }}</td>
+                                        <td>
+                                            {{ order.created_at }}
+                                        </td>
+                                        <td>
+                                            ${{ order.total_price }}
+                                        </td>
+                                        <td>
+                                            <span class="{% if order.status == 'pending' %}text-warning{% elif order.status == 'completed' %}text-success{% elif order.status == 'shipped' %}text-primary{% elif order.status == 'returned' %}text-info{% else %}text-danger{% endif %}">{{ order.status }}</span>
+                                        </td>
+                                        <td>
+                                            {{ order.payment_method }}
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'ecom_admin:order_details_product' order.id %}" class="btn btn-xs"> View details</a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div> <!-- table-responsive end// -->
+                </div>
+            </div>
+        </section> <!-- content-main end// -->
+{#    </main>#}
+
+<script>
+
+
+ {#new Chart(document.getElementById("sales-data"), {#}
+ {#     type: 'line',#}
+ {#     data: {#}
+ {#       labels: [{% for d in dates %}, "{{ d.created_at__day }}", {% endfor %}],#}
+ {#       datasets: [{#}
+ {#           data: [{% for s in sales %}, "{{ s.sales }}", {% endfor %}],#}
+ {#           label: "Product Sold",#}
+ {#           borderColor: "#3e95cd",#}
+ {#           fill: false#}
+ {#         }, {#}
+ {#           data: [{% for d in dates %},"{{ d.order_items }}", {% endfor %}],#}
+ {#           label: "Order Placed",#}
+ {#           borderColor: "#8e5ea2",#}
+ {#           fill: false#}
+ {#         }, {#}
+ {#           data: [{% for r in returns %}, "{{ r.returns }}", {% endfor %}],#}
+ {#           label: "Returned Orders",#}
+ {#           borderColor: "#3cba9f",#}
+ {#           fill: false#}
+ {#         },#}
+ {#       ]#}
+ {#     },#}
+ {#     options: {#}
+ {#       title: {#}
+ {#         display: true,#}
+ {#       }#}
+ {#     }#}
+ {#   });#}
+
+ new Chart(document.getElementById("status_count"), {
+      type: 'pie',
+      data: {
+        labels: ["Placed","Shipped","Delivered","Returned","Cancelled"],
+        datasets: [{
+          backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850"],
+          data: {{ status_count }}
+        }]
+      },
+      options: {
+        title: {
+          display: true,
+        }
+      }
+    });
+
+ new Chart(document.getElementById("most_moving_product"), {
+
+      type: 'bar',
+
+      data: {
+        labels: [{% for m in most_moving_product %}
+            "{{m.name|slice:":10"}}",
+        {% endfor %}],
+        datasets: [
+          {
+            backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850"],
+            data: {{ most_moving_product_count }}
+          }
+        ]
+      },
+      options: {
+        legend: { display: false },
+        title: {
+          display: true,
+        }
+      }
+    });
+
+</script>
+
+
+
+
+{% endblock %}

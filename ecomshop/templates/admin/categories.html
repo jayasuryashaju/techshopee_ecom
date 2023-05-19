@@ -1,0 +1,107 @@
+{% extends "admin/base.html" %}
+{% load static %}
+{% block content %}
+
+<h2 style="color: #00dbde;font-weight: bold">Categories</h2>
+
+<div class="container mt-4">
+  <h1>Categories</h1>
+  <hr>
+  <a href="{% url 'ecom_admin:add_category' %}" class="btn btn-primary">Add New Category</a>
+  <div class="row">
+    {% for category in categories %}
+      <div class="col-md-4">
+        <div class="card mb-4">
+          <div style="width: 100%; height: 200px; overflow: hidden; position: relative;">
+            <img style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); object-fit: contain; width: 100%; height: 100%;" src="{{ category.image.url }}" alt="{{ category.name }}">
+          </div>
+
+          <div class="card-body">
+            <h4 class="card-title">{{ category.name }}</h4>
+            <p class="card-text">{{ category.description }}</p>
+            <ul class="list-group">
+              <li class="list-group-item">Slug: {{ category.slug }}</li>
+              <li class="list-group-item">Created: {{ category.created }}</li>
+              <li class="list-group-item">Updated: {{ category.updated }}</li>
+              <li class="list-group-item">Image: {{ category.image }}</li>
+            </ul>
+            <div class="mt-3">
+              <a href="{% url 'ecom_admin:edit_category' category.id %}" class="btn btn-warning">Edit</a>
+              <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteCategoryModal{{ category.id }}">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Delete category modal -->
+      <div class="modal fade" id="deleteCategoryModal{{ category.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteCategoryModal{{ category.id }}Label" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="deleteCategoryModal{{ category.id }}Label">Delete category: {{ category.name }}?</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              Are you sure you want to delete the category "{{ category.name }}"?
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+              <form action="{% url 'ecom_admin:delete_category' category.pk %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Delete</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    {% endfor %}
+  </div>
+</div>
+
+
+{% endblock content %}
+
+
+
+{#{% extends "admin/base.html" %}#}
+{#{% load static %}#}
+{#{% block content %}#}
+{##}
+{##}
+{##}
+{##}
+{#<h2 style="color: #00dbde;font-weight: bold">Categories</h2>#}
+{##}
+{#<div class="container mt-4">#}
+{#  <h1>Categories</h1>#}
+{#  <hr>#}
+{#<a href="{% url 'ecom_admin:add_category' %}" class="btn btn-primary">Add New Category</a>#}
+{#  <div class="row">#}
+{#    {% for category in categories %}#}
+{#    <div class="col-md-4">#}
+{#      <div class="card mb-4">#}
+{#          <div style="width: 100%; height: 200px; overflow: hidden; position: relative;">#}
+{#            <img style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); object-fit: contain; width: 100%; height: 100%;" src="{{ category.image.url }}" alt="{{ category.name }}">#}
+{#          </div>#}
+{##}
+{#        <div class="card-body">#}
+{#          <h4 class="card-title">{{ category.name }}</h4>#}
+{#          <p class="card-text">{{ category.description }}</p>#}
+{#          <ul class="list-group">#}
+{#            <li class="list-group-item">Slug: {{ category.slug }}</li>#}
+{#            <li class="list-group-item">Created: {{ category.created }}</li>#}
+{#            <li class="list-group-item">Updated: {{ category.updated }}</li>#}
+{#            <li class="list-group-item">Image: {{ category.image }}</li>#}
+{#          </ul>#}
+{#        </div>#}
+{#      </div>#}
+{#    </div>#}
+{#    {% endfor %}#}
+{#  </div>#}
+{#</div>#}
+{##}
+{##}
+{#{% endblock content %}#}

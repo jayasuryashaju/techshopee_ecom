@@ -1,0 +1,382 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+{% block content %}
+<style>
+                                              .select-css {
+                                                display: block;
+                                                font-size: 16px;
+                                                font-family: 'Open Sans', sans-serif;
+                                                font-weight: 400;
+                                                color: #555;
+                                                line-height: 1.3;
+                                                padding: .6em 1.4em .5em .8em;
+                                                width: 100%;
+                                                max-width: 100%;
+                                                box-sizing: border-box;
+                                                margin: 0;
+                                                border: 1px solid #aaa;
+                                                border-radius: .25em;
+                                                -moz-appearance: none;
+                                                -webkit-appearance: none;
+                                                appearance: none;
+                                                background-color: #fff;
+                                                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath d='M416 176H96c-26.51 0-48 21.49-48 48v64c0 26.51 21.49 48 48 48h320c26.51 0 48-21.49 48-48v-64c0-26.51-21.49-48-48-48zm-320 80h320v-32H96v32zm320 96H96c-26.51 0-48 21.49-48 48v32c0 26.51 21.49 48 48 48h320c26.51 0 48-21.49 48-48v-32c0-26.51-21.49-48-48-48zm-320 80h320v-32H96v32z'/%3E%3C/svg%3E");
+                                                background-repeat: no-repeat;
+                                                background-position: right .7em top 50%, 0 0;
+                                                background-size: .65em auto, 100%;
+                                              }
+                                              .select-css::-ms-expand {
+                                                display: none;
+                                              }
+                                              .select-css:hover {
+                                                border-color: #888;
+                                              }
+                                              .select-css:focus {
+                                                border-color: #005b9f;
+                                                box-shadow: 0 0 0 3px rgba(0, 91, 159, .2);
+                                                outline: none;
+                                              }
+                                              .select-css option {
+                                                font-weight:normal;
+                                              }
+                                            </style>
+    <main class="main">
+        <div class="page-header text-center" style="background-image: url({% static 'assets/images/page-header-bg.jpg' %})">
+            <div class="container">
+                <h1 class="page-title">Checkout</h1>
+            </div><!-- End .container -->
+        </div><!-- End .page-header -->
+        <nav aria-label="breadcrumb" class="breadcrumb-nav">
+            <div class="container">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                    <li class="breadcrumb-item"><a href="#">Shop</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Checkout</li>
+                </ol>
+            </div><!-- End .container -->
+        </nav><!-- End .breadcrumb-nav -->
+
+        <div class="page-content">
+            <div class="checkout">
+                <div class="container">
+
+{#                    <a href="{% url 'user_profile:add_address' %}" class="btn btn-outline"><span>Add Address</span></a>#}
+{#                    <div class="checkout-discount">#}
+{#                        <form action="#">#}
+{#                            <input type="text" class="form-control" required id="checkout-discount-input">#}
+{#                            <label for="checkout-discount-input" class="text-truncate">Have a coupon? <span>Click here to enter your code</span></label>#}
+{#                        </form>#}
+{#                    </div><!-- End .checkout-discount -->#}
+{#                    <form id="coupon-form" method="get">#}
+{#                        <label for="coupon-code"></label><input type="text" id="coupon-code" required placeholder="Coupon code">#}
+{#                        <button type="submit">Apply</button>#}
+{#                    </form>#}
+                    <form id="payment-form">
+                    {% csrf_token %}
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <h4 class="checkout-title">Billing Details</h4><!-- End .checkout-title -->
+                              <label>Select address:</label>
+
+                                    <div class="row">
+                                      {% for address in addresses %}
+                                        <div class="col-md-12 mb-3">
+                                          <div class="card">
+                                            <div class="card-body">
+                                              <input class="form-check-input ml-2" type="radio" name="address" id="address" value="{{ address.id }}" id="address{{ forloop.counter }}" {% if forloop.first %}checked{% endif %}>
+                                              <label class="form-check-label ml-5" for="address{{ forloop.counter }}">
+                                                Use this address
+                                              </label>
+                                              <h5 class="card-title">{{ address.full_name }}</h5>
+                                              <p class="card-text">{{ address.address }},<br> {{ address.city }}, {{ address.state }}, {{ address.zip_code }},<br>{{ address.phone }}, <br>{{ address.email }}</p>
+                                                                                            <a href="{% url 'user_profile:edit_address' address.id %}" class="btn btn-primary">Edit</a>
+
+                                              <div class="form-check">
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                      {% endfor %}
+                                      <div class="col-md-12">
+                                        <a href="{% url 'user_profile:add_address' %}" class="btn btn-outline"><span>Add new address</span></a>
+                                      </div>
+                                    </div>
+                            </div>
+
+
+                            <aside class="col-lg-6">
+                                <div class="summary">
+                                    <h3 class="summary-title">Your Order</h3><!-- End .summary-title -->
+
+                                    <table class="table table-summary">
+                                        <thead>
+                                            <tr>
+                                                <th >Product</th>
+                                                <th style="text-align: center">Quantity</th>
+                                                <th>Total</th>
+
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                        {% for product in cart_items %}
+                                            <tr>
+                                                <td><a href="#">{{ product.product.name }}</a></td>
+                                                <td style="text-align: center" > x {{ product.quantity }}</td>
+                                                <td>${{ product.get_total_cost }}</td>
+
+
+                                            </tr>
+
+                                        {% endfor %}
+
+                                            <tr class="summary-subtotal">
+                                                <td>Subtotal:</td>
+                                                <td></td>
+                                                <td>${{ total_cost }}</td>
+                                            </tr><!-- End .summary-subtotal -->
+                                        </tbody>
+                                    </table>
+                                <br>
+                                     <h3 class="summary-title">Shipping:</h3>
+                                    <table >
+                                    <thead>
+                                            <tr>
+                                                <th></th>
+                                                <th></th>
+                                                <th></th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for shipping_option in form.shipping_options %}
+                                            <tr>
+                                                <td>{{ shipping_option.tag }}</td>
+                                                <td>{{ shipping_option.choice_label }}</td>
+
+
+
+                                            </tr>
+                                         {% endfor %}
+                                    </tbody>
+                                    </table>
+                                <hr>
+{#                                <form id="coupon-form" method="get">#}
+                                    <label for="coupon-code"></label><input type="text" id="coupon-code"  placeholder="Coupon code">
+{#                                    <button style="border-style: none" type="submit" class="btn-md p-1 w-25 btn-primary">Apply</button>#}
+
+{#                                </form>#}
+                                    <input type="button" style="border-style: none" onclick="applycoupon()" class="btn-md p-1 w-25 btn-primary" value="Apply">
+
+                                            <hr>
+                                <div class="summary-total">
+                                  <h6 >Total:  <span style="margin-left: 50%" id="costtotal"> ${{ total_cost }}</span></h6>
+                                </div>
+
+
+                                <hr>
+
+                                    <div class="accordion-summary" id="accordion-payment">
+
+                                        <h6>Payment Options</h6>
+
+                                            <div id="accordion-payment">
+                                                <div class="card">
+                                                    <div class="card-header" id="heading-3">
+                                                        <h2 class="card-title">
+                                                            <label>
+                                                                <input type="radio" name="payment_option"  value="cash_on_delivery">
+                                                                Cash on delivery
+                                                            </label>
+                                                        </h2>
+                                                    </div><!-- End .card-header -->
+                                                </div><!-- End .card -->
+
+                                                <div class="card">
+                                                    <div class="card-header" id="heading-4">
+                                                        <h2 class="card-title">
+                                                            <label>
+                                                                <input type="radio" name="payment_option" value="razorpay">
+                                                                Razorpay
+                                                            </label>
+                                                        </h2>
+                                                    </div><!-- End .card-header -->
+                                                </div><!-- End .card -->
+                                            </div><!-- End #accordion-payment -->
+                                        <br>
+                                    <button type="submit" onclick="(formSubmit())" id="submit-btn" class="btn btn-outline-primary-2 btn-order btn-block">
+                                        <span class="btn-text">Place Order</span>
+                                        <span class="btn-hover-text">Place Order</span>
+                                    </button>
+                                </div><!-- End .summary -->
+                                </div>
+                            </aside>
+                        </div><!-- End .row -->
+                    </form>
+                </div><!-- End .container -->
+            </div><!-- End .checkout -->
+        </div><!-- End .page-content -->
+    </main><!-- End .main -->
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+ function applycoupon(){
+     var coupon_code=document.getElementById('coupon-code').value
+     console.log("coupon code : ",coupon_code)
+     $.ajax({
+         url:"{% url 'cart:apply_coupon' %}",
+         method:"GET",
+         data:{
+             coupon_code:coupon_code,
+         },
+         success:(r) =>{
+             console.log("coupon is applied")
+             console.log("total cost: ",r.updated_cost)
+             $('#costtotal').text("₹"+r.updated_cost)
+
+         }
+     })
+
+ }
+
+
+
+  function formSubmit() {
+    const form = document.getElementById('payment-form');
+    var totalCostElement = document.getElementById('costtotal');
+    var totalCost = parseFloat(totalCostElement.innerText.replace('$', '')) * 100;
+    console.log(totalCost)
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const paymentMethod = document.querySelector('input[name="payment_option"]:checked').value;
+
+      if (paymentMethod === 'cash_on_delivery') {
+        console.log('ifff')
+        Swal.fire({
+				title: 'Order Placed Sucessfully',
+				text: "You won't be able to revert this!",
+				icon: 'success',
+				showCancelButton: false,
+				confirmButtonColor: '#3085d6',
+				cancelButtonColor: '#d33',
+				confirmButtonText: 'View Order'
+			}).then((result) => {
+                if(result.isConfirmed){
+                     $.ajax({
+                     url: '{% url 'cart:checkout' %}',
+                     method: 'POST',
+                     data: $('#payment-form').serialize(),
+                     success: () => {
+                      console.log('success');
+
+                    location.href = '/cart/orders/'
+                     },
+                   error: () => {
+                    console.log('error');
+                  }
+                   });
+                  }
+
+         })
+
+      } else if (paymentMethod === 'razorpay') {
+        // show the Razorpay payment interface here
+          $.ajax({
+              method: "GET",
+              url:"/cart/proceed_to_pay",
+              data: {
+                  'shipping_options': $("[name='shipping_options']:checked").val(),
+              },
+              success:function(response){
+             console.log("proceed to pay worked ")
+                  console.log("total",response.total_price)
+
+        var options = {
+          "key": "rzp_test_vu1OqJqod5sIWF",
+          "amount": parseInt(response.total_price * 100) ,
+          "currency": "INR",
+          "name": "TechShopee",
+          "description": "Test Transaction",
+          "image": "{% static 'assets/images/logo_transparent.png' %}",
+          "callback_url": "https://eneqd3r9zrjok.x.pipedream.net/",
+          "prefill": {
+            "name": "{{ user.full_name }}",
+            "email": "{{ user.email }}",
+            "contact": "{{ user.phone_number }}"
+          },
+          "notes": {
+            "address": "Razorpay Corporate Office"
+          },
+          "theme": {
+            "color": "#3399cc"
+          },
+
+          handler: function (response) {
+            // submit the order details to the server
+            $.ajax({
+              url: '{% url 'cart:checkout' %}',
+              headers: { 'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val() },
+              method: 'POST',
+              data: {
+                razorpay_payment_id: response.razorpay_payment_id,
+                amount: response.amount,
+                currency: response.currency,
+                'address': $('#address').val(),
+                'payment_option': $("[name='payment_option']:checked").val(),
+                'shipping_options': $("[name='shipping_options']:checked").val()
+              },
+              success: () => {
+                console.log('success');
+                Swal.fire(
+							'Successfull!',
+							'Your order has been placed.',
+							'success'
+						).then(() =>{
+                             location.href = '/cart/orders/'
+                })
+                {#location.href = '/cart/orders/'#}
+              },
+              error: () => {
+                console.log('error');
+              }
+            });
+          }
+        };
+        var rzp1 = new Razorpay(options);
+        rzp1.open();
+              }
+          })
+      }
+    });
+  }
+</script>
+{#<script>#}
+{#    const form = document.querySelector('#coupon-form');#}
+{#    const totalCostEl = document.querySelector('#costtotal');#}
+{##}
+{#    form.addEventListener('submit', (event) => {#}
+{#        event.preventDefault();#}
+{#        const code = document.querySelector('#coupon-code').value;#}
+{#        const totalCost = parseFloat(totalCostEl.innerText.replace('$', ''));#}
+{#        const url = `/cart/apply_coupon/?code=${code}&total_cost=${totalCost}`;#}
+{#        fetch(url)#}
+{#            .then(response => response.json())#}
+{#            .then(data => {#}
+{#                if (data.success) {#}
+{##}
+{#                    totalCostEl.innerText = `$${data.updated_cost.toFixed(2)}`;#}
+{#                    console.log(updated_cost)#}
+{#                } else {#}
+{#                    alert(data.message);#}
+{#                }#}
+{#            })#}
+{#            .catch(error => console.error(error));#}
+{#    });#}
+{#</script>#}
+
+
+{% endblock content %}

@@ -1,0 +1,45 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+{% block content %}
+
+    <div class="container pt-5">
+  <a class="btn btn-primary" href="{% url 'ecom_admin:banner_add' %}">Add banner</a>
+  <div class="banner-list">
+    {% if banners %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Product</th>
+          <th>Created At</th>
+          <th>Updated At</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for banner in banners %}
+        <tr>
+          <td><img src="{{ banner.image.url }}" alt="Banner Image"></td>
+          <td>{{ banner.product }}</td>
+          <td>{{ banner.created_at }}</td>
+          <td>{{ banner.updated_at }}</td>
+          <td>
+            <a class="btn btn-info m-2" href="{% url 'ecom_admin:banner_edit' banner.id %}">Edit</a>
+                <form id="delete-form" action="{% url 'ecom_admin:banner_delete' banner.id %}" method="POST">
+                  {% csrf_token %}
+                  <button id="delete-button" type="submit" class="btn btn-danger">Delete</button>
+                </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p>No banners found.</p>
+    {% endif %}
+  </div>
+</div>
+
+
+
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block content %}
+   <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <h2 class="text-center mb-5">Order Details</h2>
+          <div class="table-responsive">
+          <table class="table table-hover table-bordered">
+    <thead class="thead-light">
+        <tr>
+            <th>Order ID</th>
+            <th>User</th>
+            <th>Products</th>
+            <th>Quantity</th>
+            <th>Total Price</th>
+            <th>Status</th>
+            <th>Date Added</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        {% for order in orders %}
+        <tr class="order-row" data-href="{% url 'ecom_admin:order_details_product' order.id %}">
+            <td>{{ order.id }}</td>
+            <td>{{ order.user.full_name }}</td>
+            <td>{{ order.product.name }}</td>
+            <td>{{ order.quantity }}</td>
+            <td >{{ order.total_price }}</td>
+            <td class="{% if order.status == 'pending' %}text-warning{% elif order.status == 'completed' %}text-success{% elif order.status == 'shipped' %}text-primary{% elif order.status == 'returned' %}text-info{% else %}text-danger{% endif %}">{{ order.get_status_display }}</td>
+            <td>{{ order.created_at }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Get all rows with the data-href attribute
+      var rows = document.querySelectorAll("tr[data-href]");
+
+      // Add a click event listener to each row
+      rows.forEach(function(row) {
+        row.addEventListener("click", function() {
+          // Get the value of the data-href attribute
+          var href = row.getAttribute("data-href");
+
+          // Navigate to the URL
+          window.location.href = href;
+        });
+      });
+    </script>
+{% endblock %}

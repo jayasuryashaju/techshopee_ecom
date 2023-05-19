@@ -1,0 +1,125 @@
+{#{% load static %}#}
+{#<!DOCTYPE html>#}
+{#<html>#}
+{#    <head>#}
+{#        <link href="{% static 'log/css/validation.css' %}" rel="stylesheet" />#}
+{#    </head>#}
+{#    <body>#}
+{#        <div class="container">#}
+{#            <div class="header">#}
+{#                <h2>Create User</h2>#}
+{#            </div>#}
+{#              {% for message in messages %}#}
+{#                    <h5 style="color: red;text-align: center">{{ message }}</h5>#}
+{#                  {% endfor %}#}
+{#            <form action="" method="post" class="form"  >#}
+{#                {% csrf_token %}#}
+{#                <div class="form-control">#}
+{#                    {{ form }}#}
+{#                    <lable for="first_name" name="name">Full Name</lable>#}
+{##}
+{#                    {{ form.name }}#}
+{##}
+{#                </div>#}
+{#                <div class="form-control">#}
+{#                    <lable for="username" name="username">User Name</lable>#}
+{##}
+{#                    {{ form.user_name }}#}
+{#                </div>#}
+{#                <div class="form-control">#}
+{#                    <lable for="email" name="email">Email</lable>#}
+{##}
+{#                    {{ form.email }}#}
+{##}
+{#                </div>#}
+{#                <div class="form-control">#}
+{#                    <lable for="phone" name="phone">Phone Number</lable>#}
+{##}
+{#                    {{ form.phone_number }}#}
+{##}
+{#                </div>#}
+{#                <div class="form-control">#}
+{#                    <lable for="password" name="password">Password</lable>#}
+{##}
+{#                    {{ form.password1 }}#}
+{##}
+{#                </div>#}
+{#                <div class="form-control">#}
+{#                    <lable for="cpassword" name="cpassword">Confirm Password</lable>#}
+{##}
+{#                    {{ form.password2 }}#}
+{##}
+{#                </div>#}
+{##}
+{#                <div class="form-control">#}
+{#                     <br>#}
+{##}
+{#                    <button type="submit" class="btn btn-primary btn-lg">Sign Up</button>#}
+{#                </div>#}
+{#            </form>#}
+{#         <label>Already have an account </label><a href="{% url 'account:user_signin' %}" > Login</a>#}
+{#        </div>#}
+{##}
+{#    </body>#}
+{#</html>#}
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+         <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="form-box">
+                        <div class="form-tab">
+                            <ul class="nav nav-pills nav-fill" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="register-tab" data-toggle="tab" href="#register" role="tab" aria-controls="register" aria-selected="true">Register</a>
+                                </li>
+                            </ul>
+                            <div class="tab-content" id="tab-content-5">
+
+                                        <form action="user_registration" method="post" class="form" >
+                                            {% csrf_token %}
+                                            {% if form.errors %}
+                                            <div class="alert alert-danger" role="alert">
+                                                {% for field, errors in form.errors.items %}
+                                                    <strong>{{ field }}:</strong>
+                                                    {% for error in errors %}
+                                                        {{ error }}
+                                                    {% endfor %}
+                                                {% endfor %}
+                                            </div>
+                                            {% endif %}
+                                            {{ form }}
+                                            <div class="form-footer">
+                                                <button type="submit" class="btn btn-outline-primary-2">
+                                                    <span>SIGN UP</span>
+                                                    <i class="icon-long-arrow-right"></i>
+                                                </button>
+                                            </div><!-- End .form-footer -->
+                                        </form>
+                                        <div class="form-choice">
+                                            <p class="text-center">or sign in with</p>
+                                            <div class="row">
+                                                <div class="col-sm-6">
+                                                    <a href="{% url 'account:user_signin' %}" class="btn btn-login btn-g">
+
+                                                        Login With Password
+                                                    </a>
+                                                </div><!-- End .col-6 -->
+                                                <div class="col-sm-6">
+                                                    <a href="{% url 'account:login_otp' %}" class="btn btn-login  btn-f">
+
+                                                        Login With OTP
+                                                    </a>
+                                                </div><!-- End .col-6 -->
+                                            </div><!-- End .row -->
+                                        </div><!-- End .form-choice -->
+                                    </div><!-- .End .tab-pane -->
+                        </div><!-- End .form-tab -->
+                    </div><!-- End .form-box -->
+                </div><!-- End .modal-body -->
+            </div><!-- End .modal-content -->
+        </div><!-- End .modal-dialog -->
+
+{% endblock %}

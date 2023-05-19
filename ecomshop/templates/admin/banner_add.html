@@ -1,0 +1,24 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+{% block content %}
+    <div class="container pt-5">
+    <form method="post" enctype="multipart/form-data" class="banner-form">
+      {% csrf_token %}
+{#      <div class="form-group">#}
+{#        <label for="id_product">Product:</label>#}
+{#        <select name="product" id="id_product" class="form-control">#}
+{#          {% for product in products %}#}
+{#            <option value="{{ product.id }}" {% if banner.product.id == product.id %}selected{% endif %}>{{ product.name }}</option>#}
+{#          {% endfor %}#}
+{#        </select>#}
+{#      </div>#}
+{#      <div class="form-group">#}
+{#        <label for="id_image">Image:</label>#}
+{#        <input type="file" name="image" id="id_image" class="form-control-file">#}
+{#      </div>#}
+        {{ form.as_p }}
+      <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+    </div>
+
+{% endblock %}

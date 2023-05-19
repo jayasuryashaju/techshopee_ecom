@@ -1,0 +1,79 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-md-3">
+      <h4>Categories</h4>
+      <ul class="list-group">
+        {% for category in categories %}
+          <li class="list-group-item">
+            <a href="?category={{ category.id }}">{{ category.name }}</a>
+            <a href="{% url 'ecom_admin:add_product' category.id %}" class="btn btn-sm btn-outline-secondary ml-2">Add Product</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="col-md-9">
+    <h4>Products</h4>
+      {% if products %}
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Price</th>
+              <th>Stock Quantity</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for product in products %}
+              <tr>
+                <td>
+                  <div class="card-img-container">
+                    <img class="card-img-top" src="{{ product.image1.url }}" alt="{{ product.name }}">
+                  </div>
+                </td>
+                <td><a href="{% url 'ecom_admin:product_details' product.id %}">{{ product.name }}</a><</td>
+                <td>{{ product.description|truncatechars:50 }}</td>
+                <td>${{ product.price }}</td>
+                <td>{{ product.stock_quantity }}</td>
+                <td>
+                  <a href="{% url 'ecom_admin:product_details' product.id %}" class="btn btn-sm btn-outline-secondary">Details</a>
+                  <a href="{% url 'ecom_admin:edit_product' product.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                  <form id="delete-form" action="{% url 'ecom_admin:delete_product' product.id %}" method="POST" style="display: inline-block;">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-sm btn-outline-danger" onclick="confirmDelete(event)">Delete</button>
+                    </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p>No products found.</p>
+      {% endif %}
+    </div>
+  </div>
+
+<script>
+  function confirmDelete(event) {
+    event.preventDefault();
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        document.getElementById("delete-form").submit();
+      }
+    })
+  }
+</script>
+
+{% endblock %}

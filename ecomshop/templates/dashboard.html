@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+    <main class="main">
+        <div class="page-header text-center" style="background-image: url({% static 'assets/images/page-header-bg.jpg'  %})">
+            <div class="container">
+                <h1 class="page-title">My Account</h1>
+            </div><!-- End .container -->
+        </div><!-- End .page-header -->
+        <nav aria-label="breadcrumb" class="breadcrumb-nav mb-3">
+            <div class="container">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                    <li class="breadcrumb-item"><a href="#">Shop</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">My Account</li>
+                </ol>
+            </div><!-- End .container -->
+        </nav><!-- End .breadcrumb-nav -->
+
+        <div class="page-content">
+            <div class="dashboard">
+                <div class="container">
+                    <div class="row">
+                        <aside class="col-md-4 col-lg-3">
+                            <ul class="nav nav-dashboard flex-column mb-3 mb-md-0" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active"  href="{% url 'user_profile:profile_view' %}" aria-selected="true">Dashboard</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link"  href="{% url 'cart:order_list' %}"  aria-selected="false">Orders</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link"  href="{% url 'user_profile:addresses' %}"  aria-selected="false">Addresses</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link"  href="{% url 'user_profile:add_address' %}" role="tab"  aria-selected="false">Add Addresses</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" aria-controls="tab-account" aria-selected="false">Account Details</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{% url 'account:user_signout' %}">Sign Out</a>
+                                </li>
+                            </ul>
+                        </aside><!-- End .col-lg-3 -->
+                        <div class="col-md-8 col-lg-9">
+                            <div class="tab-content">
+                                <div class="tab-pane fade show active" id="tab-dashboard" role="tabpanel" aria-labelledby="tab-dashboard-link">
+                                    <div class="container">
+{#                                      <div class="row">#}
+                                      {% if messages %}
+                                        <ul class="messages">
+                                            {% for message in messages %}
+                                                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+              <form method="post" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  <div class="form-group row">
+                    <div class="col-sm-4">
+                      {% if user_form.instance.avatar %}
+                      <img src="{{ user_form.instance.avatar.url }}" class="profile-pic rounded-circle" alt="Profile Picture" id="profile-pic-preview" style="width: 150px; height: 150px">
+                      {% else %}
+                      <img src="{% static 'assets/images/default-profile-pic.png' %}" class="profile-pic rounded-circle" alt="Profile Picture" id="profile-pic-preview">
+                      {% endif %}
+{#                      <label for="id_avatar" class="btn btn-outline-darker">Select Picture</label>#}
+                      {{ user_form.avatar }}
+                    </div>
+                    <div class="col-sm-8">
+                      <div class="form-group row">
+                        <label class="col-sm-2 col-form-label">{{ user_form.first_name.label_tag }}</label>
+                        <div class="col-sm-10">
+                          {{ user_form.first_name }}
+                        </div>
+                      </div>
+                      <div class="form-group row">
+                        <label class="col-sm-2 col-form-label">{{ user_form.last_name.label_tag }}</label>
+                        <div class="col-sm-10">
+                          {{ user_form.last_name }}
+                        </div>
+                      </div>
+                      <div class="form-group row">
+                        <label class="col-sm-2 col-form-label">{{ user_form.email.label_tag }}</label>
+                        <div class="col-sm-10">
+                          {{ user_form.email }}
+                        </div>
+                      </div>
+                      <div class="form-group row">
+                        <label class="col-sm-2 col-form-label">{{ user_form.phone_number.label_tag }}</label>
+                        <div class="col-sm-10">
+                          {{ user_form.phone_number }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <button class="btn btn-primary" type="submit">Update Profile</button>
+                </form>
+
+
+
+
+
+
+{#                            <div class="container">#}
+{#                              <div class="row justify-content-center">#}
+{#                                <div class="col-md-8">#}
+{#                                  <h3 class="mb-3">{{ user.get_full_name }}</h3>#}
+{#                                  <form method="post" enctype="multipart/form-data">#}
+{#                                    {% csrf_token %}#}
+{#                                    <div class="row mb-3">#}
+{#                                      <div class="col-md-4 pe-0">#}
+{#                                        {% if user.avatar %}#}
+{#                                        <img src="{{ user.avatar.url }}" class="profile-pic rounded-circle" alt="Profile Picture" id="profile-pic-preview">#}
+{#                                        {% else %}#}
+{#                                        <img src="{% static 'assets/images/default-profile-pic.png' %}" class="profile-pic rounded-circle" alt="Profile Picture" id="profile-pic-preview">#}
+{#                                        {% endif %}#}
+{#                                        <label for="image" class="btn btn-outline-darker">Select Picture</label>#}
+{#                                        <input type="file" id="image" name="avatar" class="d-none">#}
+{#                                      </div>#}
+{#                                      <div class="col-md-6">#}
+{#                                        <label for="first_name" class="form-label">First Name</label>#}
+{#                                        <div class="input-group">#}
+{#                                          <input type="text" class="form-control" id="first_name" name="first_name" value="{{ user.first_name }}">#}
+{#                                        </div>#}
+{#                                      </div>#}
+{#                                      <div class="col-md-6">#}
+{#                                        <label for="last_name" class="form-label">Last Name</label>#}
+{#                                        <div class="input-group">#}
+{#                                          <input type="text" class="form-control" id="last_name" name="last_name" value="{{ user.last_name }}">#}
+{#                                        </div>#}
+{#                                      </div>#}
+{#                                    </div>#}
+{#                                    <div class="mb-3">#}
+{#                                      <label for="email" class="form-label">Email</label>#}
+{#                                      <div class="input-group">#}
+{#                                        <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}">#}
+{#                                      </div>#}
+{#                                    </div>#}
+{#                                    <div class="mb-3">#}
+{#                                      <label for="phone_number" class="form-label">Phone Number</label>#}
+{#                                      <div class="input-group">#}
+{#                                        <input type="tel" class="form-control" id="phone_number" name="phone_number" value="{{ user.phone_number }}">#}
+{#                                      </div>#}
+{#                                    </div>#}
+{#                                    <div class="d-grid gap-2 mt-3">#}
+{#                                      <button class="btn btn-primary" type="submit">Update Profile</button>#}
+{#                                    </div>#}
+{#                                  </form>#}
+{#                                </div>#}
+{#                              </div>#}
+{#                            </div>#}
+{#                                      </div>#}
+{#                                    </div>#}
+
+{#                                    ____________________________________________#}
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- End .container -->
+            </div><!-- End .dashboard -->
+        </div><!-- End .page-content -->
+    </main><!-- End .main -->
+
+
+
+{% endblock %}

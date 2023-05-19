@@ -1,0 +1,150 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+{% block content %}
+
+        <div class="container-fluid">
+          <h2>Category Offers</h2>
+            <a href="{% url 'ecom_admin:add_category_offer' %}" class="btn btn-primary">Add category offer</a>
+             <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Discount</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th scope="col">Status</th>
+                <th scope="col">Edit</th>
+                <th scope="col">Delete</th>
+
+              </tr>
+            </thead>
+            <tbody>
+              {% for offer in category_offers %}
+                <tr>
+                  <td>{{ offer.name }}</td>
+                  <td>{{ offer.discount }}%</td>
+                  <td>{{ offer.start_date }}</td>
+                  <td>{{ offer.end_date }}</td>
+                  <<td>
+                        <form method="post">
+                            {% csrf_token %}
+                            {% if offer.is_active == True  %}
+                            <a class="btn btn-outline-success" href="{% url 'ecom_admin:deactivate_offer' offer.id %}">Active</a>
+                            {% else %}
+                            <a class="btn btn-outline-danger" href="{% url 'ecom_admin:apply_category_offer' offer.id %}">Not Active</a>
+                            {% endif %}
+                        </form>
+                    </td>
+
+                  <td><a class="btn btn-warning" href="{% url 'ecom_admin:edit_category_offer' offer.id %}">Edit</a></td>
+                  <td><a class="btn btn-danger" href="{% url 'ecom_admin:delete_category_offer' offer.id %}">Delete</a></td>
+
+
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="6">No offers found.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+     <h2>Product Offers</h2>
+            <a href="{% url 'ecom_admin:add_product_offer' %}" class="btn btn-primary">Add product offer</a>
+
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Discount</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th scope="col">Status</th>
+                <th scope="col">Edit</th>
+                <th scope="col">Delete</th>
+
+              </tr>
+            </thead>
+            <tbody>
+              {% for offer in product_offers %}
+                <tr>
+                  <td>{{ offer.name }}</td>
+                  <td>{{ offer.discount }}%</td>
+                  <td>{{ offer.start_date }}</td>
+                  <td>{{ offer.end_date }}</td>
+                  <td>
+                            <form  method="post">
+                              {% csrf_token %}
+                                {% if offer.is_active == True  %}
+{#                                <a class="btn btn-outline-success" href="{% url 'ecom_admin:deactivate_product_offer' offer.id %}">Active</a>#}
+                                <a class="btn btn-outline-success" id="product_deactivate_button" data-id="{{ offer.id }}">Active</a>
+                                {% else %}
+                                <a class="btn btn-outline-danger"  href="{% url 'ecom_admin:apply_product_offer' offer.id %}">Not Active</a>
+                                {% endif %}
+                            </form>
+                  </td>
+                  <td><a class="btn btn-warning" href="{% url 'ecom_admin:edit_product_offer' offer.id %}">Edit</a></td>
+                  <td><a class="btn btn-danger" href="{% url 'ecom_admin:delete_product_offer' offer.id %}">Delete</a></td>
+
+
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="6">No offers found.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+    <script>
+  $(document).ready(function() {
+    $('#product_deactivate_button').on('click', function() {
+      var offerId = $(this).data('id');
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+      }).then((result) => {
+
+        if (result.isConfirmed) {
+          $.ajax({
+            type: "POST",
+            url: `/admin_login/deactivate_product_offer/`,
+            data: {
+              'offer_id': offerId,
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+
+            success: function() {
+              Swal.fire(
+                'Deleted!',
+                'Your address has been deleted.',
+                'success'
+              ).then((result) => {
+                if (result.isConfirmed) {
+                  location.reload();
+                }
+              });
+            },
+            error: function() {
+              Swal.fire(
+                'Error!',
+                'An error occurred while deleting your address.',
+                'error'
+              );
+            }
+          });
+        }
+      });
+    });
+  });
+</script>
+
+
+{% endblock %}

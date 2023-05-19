@@ -1,0 +1,217 @@
+{% extends "admin/base.html" %}
+{% load static %}
+{% block content %}
+
+  <div class="container-scroller">
+
+
+    <div class="container-fluid page-body-wrapper">
+
+      <div class="main-panel">
+        {% for message in messages %}
+        <h2>{{message}}</h2>
+        {% endfor %}
+        <div class="content-wrapper">
+            <div class="m-2">
+              {% if order %}
+                <div class="btn-wrapper">
+                    <a target="_blank" href="{% url 'ecom_admin:generates_sales_report' %}" class="btn btn-outline-dark"><i class="icon-printer"></i> Download as PDF</a>
+                    <button onclick="exportHTML()" class="btn btn-outline-primary"><i class="icon-printer"></i> Export as Doc</button>
+                    <!-- <a href="" class="btn btn-primary text-white me-0"><i class="icon-download"></i> Export as Doc</a> -->
+                    <!-- <button id="downlaodsalesReportexcel" class="btn mx-3 btn-success text-white me-0"><i class="icon-download"></i> Export as Excel</button> -->
+
+                </div>
+                {% else %}
+
+                {% endif %}
+                <form action="{% url 'ecom_admin:by_date' %}" method="GET">
+                    <div class="row mt-5">
+                        <div class="col-md-3">
+                            <label>From</label>
+                            <input type="date" class="form-control" name="from">
+                            <br>
+                        </div>
+                        <div class="col-md-4">
+                            <label>To</label>
+                            <input type="date" class="form-control" name="to">
+
+                            <div class="col-md-4 mt-3">
+                              <button class="btn btn-primary" type="submit">Submit</button>
+                          </div>
+                        </div>
+
+
+                    </div>
+                </form>
+
+          <div class="row mt-4">
+            <div class="col-lg-12 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <h4 class="card-title text-center">Sales Report</h4>
+                  <p class="card-description">
+
+
+
+                  </p>
+                  <div class="table-responsive">
+                    {% if order %}
+                    <table class="table table-striped" id="sales-table">
+                      <thead>
+                        <tr>
+                          <th>Order ID</th>
+                          <th>Order Date</th>
+                          <th>Customer</th>
+                          <th>Amount</th>
+                          <th>Payment Method</th>
+                          <th>Order Status</th>
+                          <!-- <th>Is Available</th> -->
+
+
+                        </tr>
+                      </thead>
+
+                      <tbody>
+
+                        {% for o in order %}
+                        <tr>
+                            <td>{{ o.id }}</td>
+                            <td>{{ o.ordered_date }}</td>
+                            <td>{{ o.user }}</td>
+                            <td>{{ o.price }}</td>
+                            <td>{{ o.method }}</td>
+                            <td>{{ o.status }}</td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+
+                    </table>
+                    {% else %}
+                        <h3 class="text-center mt-3">No Data</h3>
+                    {% endif %}
+                  </div>
+
+
+
+
+
+              <div class="col-12 pb-1 mt-3">
+                <nav aria-label="Page navigation">
+                    {% if order.has_other_pages %}
+                  <ul class="pagination justify-content-center mb-3">
+                    {% if order.has_previous %}
+                    <li class="page-item">
+                      <a class="page-link" href="?page={{ order.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                        <span class="sr-only">Previous</span>
+                      </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="Previous">
+                          <span aria-hidden="true">&laquo;</span>
+                          <span class="sr-only">Previous</span>
+                        </a>
+                      </li>
+                      {% endif %}
+
+                    {% for i in order.paginator.page_range %}
+                    {% if order.number == i %}
+                    <li class="page-item active"><a class="page-link" href="#">{{ i }}</a></li>
+                    {% else %}
+                    <li class="page-item "><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                    {% endif %}
+
+                    {% endfor %}
+
+
+                    {% if order.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ order.next_page_number }}" aria-label="Next">
+                          <span aria-hidden="true">&raquo;</span>
+                          <span class="sr-only">Next</span>
+                      </a>
+                      </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="Next">
+                          <span aria-hidden="true">&raquo;</span>
+                          <span class="sr-only">Next</span>
+                      </a>
+                      </li>
+                      {% endif %}
+
+
+                </ul>
+                {% endif %}
+                </nav>
+            </div>
+                </div>
+
+
+              </div>
+            </div>
+
+
+
+
+
+          </div>
+
+        </div>
+
+
+
+
+
+</div>
+
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+
+
+
+  <script src="{% static 'js/table2excel.js'  %}"></script>
+  <script>
+    document.getElementById('downlaodsalesReportexcel').addEventListener('click',function(){
+        var table2excel = new Table2Excel();
+        table2excel.export(document.querySelectorAll("#sales-table"));
+    })
+
+
+
+      const year = new Date().getFullYear()
+      let selectBox = document.getElementById('yearDP')
+      selectBox.value = year
+
+      const month=new Date().getMonth()
+      let selectMonth=document.getElementById('monthDP')
+      selectMonth.value=month
+
+
+
+        function exportHTML(){
+           var header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' "+
+                "xmlns:w='urn:schemas-microsoft-com:office:word' "+
+                "xmlns='http://www.w3.org/TR/REC-html40'>"+
+                "<head><meta charset='utf-8'><title>Export HTML to Word Document with JavaScript</title></head><body>";
+           var footer = "</body></html>";
+           var sourceHTML = header+document.getElementById("sales-table").innerHTML+footer;
+
+           var source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
+           var fileDownload = document.createElement("a");
+           document.body.appendChild(fileDownload);
+           fileDownload.href = source;
+           fileDownload.download = 'document.doc';
+           fileDownload.click();
+           document.body.removeChild(fileDownload);
+        }
+
+
+  </script>
+
+{% endblock %}
