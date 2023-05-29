@@ -68,7 +68,7 @@ def admin_panel(request):
         for i in products:
             most_moving_product.append(i)
             most_moving_product_count.append(OrderItem.objects.filter(product=i).count())
-        print(most_moving_product[1])
+
 
         placed_count = Order.objects.filter(status='pending').count()
         shipped_count = Order.objects.filter(status='shipped').count()
