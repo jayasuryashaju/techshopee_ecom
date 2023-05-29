@@ -109,28 +109,28 @@
                             <aside class="col-lg-6">
                                 <div class="summary">
                                     <h3 class="summary-title">Your Order</h3><!-- End .summary-title -->
+                                    <p id="product_id" style="display: none">{{ product.id }}</p>
+                                    <p id="quantity" style="display: none">{{ quantity }}</p>
 
                                     <table class="table table-summary">
                                         <thead>
                                             <tr>
                                                 <th >Product</th>
-                                                <th style="text-align: center">Quantity</th>
+                                                <th  style="text-align: center">Quantity</th>
                                                 <th>Total</th>
 
                                             </tr>
                                         </thead>
 
                                         <tbody>
-                                        {% for product in cart_items %}
                                             <tr>
-                                                <td><a href="#">{{ product.product.name }}</a></td>
-                                                <td style="text-align: center" > x {{ product.quantity }}</td>
-                                                <td>${{ product.get_total_cost }}</td>
+                                                <td><a href="#">{{ product.name }}</a></td>
+                                                <td style="text-align: center" > x {{ quantity }}</td>
+                                                <td>${{ total_cost }}</td>
 
 
                                             </tr>
 
-                                        {% endfor %}
 
 {#                                            <tr class="summary-subtotal">#}
 {#                                                <td>Subtotal:</td>#}
@@ -287,12 +287,16 @@
 <script>
  function applyCoupon(){
      var coupon_code=document.getElementById('coupon-code').value
+     var product_id=document.getElementById('product_id').value
+     var quantity=document.getElementById('quantity').value
      console.log("coupon code : ",coupon_code)
      $.ajax({
-         url:"{% url 'cart:apply_coupon' %}",
+         url:"{% url 'cart:apply_coupon_buy_now' %}",
          method:"GET",
          data:{
              coupon_code:coupon_code,
+             quantity,
+             product_id,
          },
          success:(r) =>{
              console.log("coupon is applied")
@@ -305,12 +309,17 @@
  }
  function deleteCoupon(){
      var coupon_code=document.getElementById('coupon-code').value
+      var product_id=document.getElementById('product_id').value
+     var quantity=document.getElementById('quantity').value
+
      console.log("coupon code : ",coupon_code)
      $.ajax({
          url:"{% url 'cart:delete_coupon' %}",
          method:"GET",
          data:{
              coupon_code:coupon_code,
+             quantity,
+             product_id
          },
          success:(r) =>{
              console.log("coupon is deleted")
@@ -324,7 +333,8 @@
 
  }
 
-
+</script>
+    <script>
 
   function formSubmit() {
     const form = document.getElementById('payment-form');
@@ -335,9 +345,15 @@
     form.addEventListener('submit', (event) => {
       event.preventDefault();
       const paymentMethod = document.querySelector('input[name="payment_option"]:checked').value;
+      var product_idElement=document.getElementById('product_id')
+        var product_id = product_idElement.textContent.trim();
+        var quantityElement = document.getElementById("quantity");
+        var quantity = quantityElement.textContent.trim();
 
       if (paymentMethod === 'cash_on_delivery') {
         console.log('ifff')
+                  console.log(product_id,quantity)
+
         Swal.fire({
 				title: 'Order Placed Sucessfully',
 				text: "You won't be able to revert this!",
@@ -349,9 +365,17 @@
 			}).then((result) => {
                 if(result.isConfirmed){
                      $.ajax({
-                     url: '{% url 'cart:checkout' %}',
-                     method: 'POST',
-                     data: $('#payment-form').serialize(),
+                     url: "{% url 'cart:buy_now' %}",
+                     method: "POST",
+                     headers: { 'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val() },
+                     data: {
+                         'shipping_options': $("[name='shipping_options']:checked").val(),
+                        'product_id':product_id,
+                        'quantity': quantity,
+                         'address': $('#address').val(),
+                         'payment_option': 'cash_on_delivery'
+
+                    },
                      success: () => {
                       console.log('success');
 
@@ -369,9 +393,13 @@
         // show the Razorpay payment interface here
           $.ajax({
               method: "GET",
-              url:"/cart/proceed_to_pay",
+              url:"/cart/proceed_to_pay_buy_now",
               data: {
                   'shipping_options': $("[name='shipping_options']:checked").val(),
+                        'product_id':product_id,
+                        'quantity': quantity,
+                         'address': $('#address').val(),
+                  'payment_option': 'razorpay'
               },
               success:function(response){
         var options = {
@@ -397,16 +425,18 @@
           handler: function (response) {
             // submit the order details to the server
             $.ajax({
-              url: '{% url 'cart:checkout' %}',
+              url: '{% url 'cart:buy_now' %}',
               headers: { 'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val() },
               method: 'POST',
               data: {
                 razorpay_payment_id: response.razorpay_payment_id,
                 amount: response.amount,
                 currency: response.currency,
-                'address': $('#address').val(),
-                'payment_option': $("[name='payment_option']:checked").val(),
-                'shipping_options': $("[name='shipping_options']:checked").val()
+                'shipping_options': $("[name='shipping_options']:checked").val(),
+                        'product_id':product_id,
+                        'quantity': quantity,
+                         'address': $('#address').val(),
+                  'payment_option': 'razorpay'
               },
               success: () => {
                 console.log('success');
@@ -490,13 +520,21 @@ $(document).ready(function() {
     <script>
     function updateData() {
         var coupon_code=document.getElementById('coupon-code').value
+        var product_idElement=document.getElementById('product_id')
+        var product_id = product_idElement.textContent.trim();
+        var quantityElement = document.getElementById("quantity");
+        var quantity = quantityElement.textContent.trim();
+        console.log(quantity,product_id);
   // Make an AJAX request
   $.ajax({
-    url: '/cart/proceed_to_pay',  // Replace with the URL of your Django endpoint
+    url: '/cart/proceed_to_pay_buy_now',  // Replace with the URL of your Django endpoint
     type: 'GET',
     data: {
               'shipping_options': $("[name='shipping_options']:checked").val(),
               'coupon_code':coupon_code,
+                'product_id':product_id,
+                'quantity': quantity,
+
             },
     dataType: 'json',
     success: function(response) {

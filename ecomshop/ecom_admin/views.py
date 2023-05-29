@@ -610,9 +610,11 @@ def order_details(request):
 @login_required(login_url='admin_login')
 def order_details_product(request, order_id):
     order = get_object_or_404(Order, id=order_id)
+    order_items = OrderItem.objects.filter(order_id=order_id)
 
     context = {
         'order': order,
+        'order_items': order_items,
 
     }
 
@@ -627,7 +629,7 @@ def change_order_status(request, order_id):
         order.status = new_status
         order.save()
         # return HttpResponseRedirect(reverse('ecom_admin:order_details_product', args=(order_id,)))
-        return redirect('ecom_admin:order_details')
+        return redirect('ecom_admin:order_details_product', order_id=order_id)
     return render(request, 'admin/order_details_product.html', {'order': order})
 
 

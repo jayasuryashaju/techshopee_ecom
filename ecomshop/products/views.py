@@ -59,3 +59,44 @@ def product_view(request, product_id):
                'cart_items': cart_items,
                }
     return render(request, 'product_view.html', context)
+
+
+def filter_products(request):
+    global min_price, max_price, products
+    categories = Category.objects.all()
+    email = request.session.get('email')
+    phone_number = request.session.get('phone_number')
+    cart_items = []
+    total_price = 0
+    cart_count = 0
+    if email or phone_number:
+        cart_items = Cart.objects.filter(user=request.user)
+        total_price = sum(item.product.price * item.quantity for item in cart_items)
+        cart_count = cart_items.count()
+    if request.method == 'GET':
+        min_price = request.GET.get('minPrice')
+        max_price = request.GET.get('maxPrice')
+        products = Product.objects.filter(price__range=(min_price, max_price))
+        print(products)
+
+    # Pagination
+    paginator = Paginator(products, 5)
+    page = request.GET.get('page', 1)
+    products = paginator.get_page(page)
+
+    # Counters
+    total_products = Product.objects.filter(price__range=(min_price, max_price)).count()
+    num_products_shown = len(products)
+
+    context = {
+        'products': products,
+        'categories': categories,
+        'total_products': total_products,
+        'num_products_shown': num_products_shown,
+        'cart_items': cart_items,
+        'total_price': total_price,
+        'cart_count': cart_count
+
+    }
+    print('hei bhefb dsjhzvx sjh jshbvkjksdbcdkjhsbzkjcdcbdskzjb')
+    return render(request, 'category_list.html', context)

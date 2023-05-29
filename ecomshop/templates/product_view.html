@@ -81,6 +81,11 @@
 
                                                 {% csrf_token %}
                                                 <input type="number" id="qty" name="quantity" class="form-control" value="1" min="1" max="{{ product.stock_quantity }}" step="1" data-decimals="0" required>
+                                                <br>
+                                                <!-- Inside the loop generating products -->
+                                                <a href="" class="btn btn-info buy-now-btn" data-product-id="{{ product.id }}">Buy Now</a>
+
+
                                                 <button type="submit" class="btn-product btn-cart" style="width: auto; height: 20px; border: white; background-color: white; font-size: 14px">Add to Cart</button>
                                                  <div id="stock-alert" class="alert alert-warning" role="alert" style="display: none;"></div>
                                                     <a href="{% url 'cart:add_to_wishlist' product_id=product.id %}" class="btn-product btn-wishlist" title="Add to wishlist"><span>Add to Wishlist</span></a>
@@ -335,7 +340,24 @@ $(document).on('click', '.btn-wishlist', function(event) {
 
 
 
+<script>
+   // Attach the click event listener to the "Buy Now" button
+document.querySelectorAll(".buy-now-btn").forEach(function(button) {
+  button.addEventListener("click", function(event) {
+    event.preventDefault();
 
+    // Get the product ID and quantity
+    var productId = this.getAttribute("data-product-id");
+    var quantity = document.getElementById("qty").value;
+
+    // Construct the URL with the necessary parameters
+    var url = "{% url 'cart:checkout_buy_now' %}?product_id=" + productId + "&quantity=" + quantity;
+
+    // Redirect to the buy_now view function URL
+    window.location.href = url;
+  });
+});
+</script>
 
 
 

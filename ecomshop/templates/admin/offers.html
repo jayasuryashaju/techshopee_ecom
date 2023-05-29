@@ -29,15 +29,15 @@
                         <form method="post">
                             {% csrf_token %}
                             {% if offer.is_active == True  %}
-                            <a class="btn btn-outline-success" href="{% url 'ecom_admin:deactivate_offer' offer.id %}">Active</a>
+                            <a class="btn btn-outline-success" href="{% url 'ecom_admin:deactivate_offer' offer.id %}" onclick="return confirm('Are you sure you want to Deactivate this offer?')">Active</a>
                             {% else %}
-                            <a class="btn btn-outline-danger" href="{% url 'ecom_admin:apply_category_offer' offer.id %}">Not Active</a>
+                            <a class="btn btn-outline-danger" href="{% url 'ecom_admin:apply_category_offer' offer.id %}" onclick="return confirm('Are you sure you want to Activate this offer?')">Not Active</a>
                             {% endif %}
                         </form>
                     </td>
 
                   <td><a class="btn btn-warning" href="{% url 'ecom_admin:edit_category_offer' offer.id %}">Edit</a></td>
-                  <td><a class="btn btn-danger" href="{% url 'ecom_admin:delete_category_offer' offer.id %}">Delete</a></td>
+                  <td><a class="btn btn-danger" href="{% url 'ecom_admin:delete_category_offer' offer.id %}" onclick="return confirm('Are you sure you want to delete this?')">Delete</a></td>
 
 
                 </tr>
@@ -76,14 +76,14 @@
                               {% csrf_token %}
                                 {% if offer.is_active == True  %}
 {#                                <a class="btn btn-outline-success" href="{% url 'ecom_admin:deactivate_product_offer' offer.id %}">Active</a>#}
-                                <a class="btn btn-outline-success" id="product_deactivate_button" data-id="{{ offer.id }}">Active</a>
+                                <a class="btn btn-outline-success" id="product_deactivate_button" data-id="{{ offer.id }}" onclick="return confirm('Are you sure you want to Deactivate this offer?')">Active</a>
                                 {% else %}
-                                <a class="btn btn-outline-danger"  href="{% url 'ecom_admin:apply_product_offer' offer.id %}">Not Active</a>
+                                <a class="btn btn-outline-danger"  href="{% url 'ecom_admin:apply_product_offer' offer.id %}" onclick="return confirm('Are you sure you want to Activate this offer?')">Not Active</a>
                                 {% endif %}
                             </form>
                   </td>
                   <td><a class="btn btn-warning" href="{% url 'ecom_admin:edit_product_offer' offer.id %}">Edit</a></td>
-                  <td><a class="btn btn-danger" href="{% url 'ecom_admin:delete_product_offer' offer.id %}">Delete</a></td>
+                  <td><a class="btn btn-danger" href="{% url 'ecom_admin:delete_product_offer' offer.id %}" onclick="return confirm('Are you sure you want to delete this?')">Delete</a></td>
 
 
                 </tr>

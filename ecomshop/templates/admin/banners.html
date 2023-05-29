@@ -27,7 +27,7 @@
             <a class="btn btn-info m-2" href="{% url 'ecom_admin:banner_edit' banner.id %}">Edit</a>
                 <form id="delete-form" action="{% url 'ecom_admin:banner_delete' banner.id %}" method="POST">
                   {% csrf_token %}
-                  <button id="delete-button" type="submit" class="btn btn-danger">Delete</button>
+                  <button id="delete-button" type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this?')">Delete</button>
                 </form>
           </td>
         </tr>
@@ -40,6 +40,16 @@
   </div>
 </div>
 
-
+  <script>
+    $(document).ready(function() {
+      $('#delete-button').on('click', function(event) {
+        event.preventDefault();
+        var confirm = confirm('Are you sure you want to delete this banner?');
+        if (confirm) {
+          $('#delete-form').submit();
+        }
+      });
+    });
+  </script>
 
 {% endblock %}

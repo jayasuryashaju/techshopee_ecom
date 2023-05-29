@@ -156,14 +156,12 @@
                         <div class="sidebar sidebar-shop">
                             <div class="widget widget-clean">
                                 <label>Filters:</label>
-                                <a href="#" class="sidebar-filter-clear">Clean All</a>
+{#                                <a href="#" class="sidebar-filter-clear">Clean All</a>#}
                             </div><!-- End .widget widget-clean -->
 
                             <div class="widget">
                                 <h3 class="widget-title">
-                                    <a data-toggle="collapse" href="#widget-1" role="button" aria-expanded="true" aria-controls="widget-1">
                                         Category
-                                    </a>
                                 </h3><!-- End .widget-title -->
 
                                 <div class="collapse show" id="widget-1">
@@ -176,8 +174,9 @@
 
                                                 <div class="custom-control custom-checkbox">
 
-                                                    <input type="checkbox" class="custom-control-input" id="cat-1">
-                                                    <label class="custom-control-label" for="cat-1">{{ category }}</label>
+                                                   <ul>
+                                                       <li><a href="{% url 'products:product_list' category.id %}">{{ category }}</a></li>
+                                                   </ul>
 
                                                 </div><!-- End .custom-checkbox -->
 {#                                                <span class="item-count">3</span>#}
@@ -191,47 +190,18 @@
                                 </div><!-- End .collapse -->
                             </div><!-- End .widget -->
 
-{#                            <div class="widget widget-collapsible">#}
-{#                                <h3 class="widget-title">#}
-{#                                    <a data-toggle="collapse" href="#widget-4" role="button" aria-expanded="true" aria-controls="widget-4">#}
-{#                                        Brand#}
-{#                                    </a>#}
-{#                                </h3><!-- End .widget-title -->#}
+                            <div class="widget widget-collapsible">
+                                <h3 class="widget-title">
+                                   Price
+                                </h3><!-- End .widget-title -->
 
-{#                                <div class="collapse show" id="widget-4">#}
-{#                                    <div class="widget-body">#}
-{#                                        <div class="filter-items">#}
-{#                                            <div class="filter-item">#}
-{#                                                <div class="custom-control custom-checkbox">#}
-{#                                                    <input type="checkbox" class="custom-control-input" id="brand-1">#}
-{#                                                    <label class="custom-control-label" for="brand-1">Next</label>#}
-{#                                                </div><!-- End .custom-checkbox -->#}
-{#                                            </div><!-- End .filter-item -->#}
-{#                                        </div><!-- End .filter-items -->#}
-{#                                    </div><!-- End .widget-body -->#}
-{#                                </div><!-- End .collapse -->#}
-{#                            </div><!-- End .widget -->#}
+                                <div class="price-range-selector">
+                                  <input type="number" class="form-control price-range-input" placeholder="Min" id="minPrice">
+                                    <br>
+                                  <input type="number" class="form-control price-range-input" placeholder="Max" id="maxPrice">
+                                  <button class="btn btn-primary price-range-btn" onclick="filterProducts()">Filter</button>
 
-{#                            <div class="widget widget-collapsible">#}
-{#                                <h3 class="widget-title">#}
-{#                                    <a data-toggle="collapse" href="#widget-5" role="button" aria-expanded="true" aria-controls="widget-5">#}
-{#                                        Price#}
-{#                                    </a>#}
-{#                                </h3><!-- End .widget-title -->#}
-{##}
-{#                                <div class="collapse show" id="widget-5">#}
-{#                                    <div class="widget-body">#}
-{#                                        <div class="filter-price">#}
-{#                                            <div class="filter-price-text">#}
-{#                                                Price Range:#}
-{#                                                <span id="filter-price-range"></span>#}
-{#                                            </div><!-- End .filter-price-text -->#}
-{##}
-{#                                            <div id="price-slider"></div><!-- End #price-slider -->#}
-{#                                        </div><!-- End .filter-price -->#}
-{#                                    </div><!-- End .widget-body -->#}
-{#                                </div><!-- End .collapse -->#}
-{#                            </div><!-- End .widget -->#}
+                            </div><!-- End .collapse -->
                         </div><!-- End .sidebar sidebar-shop -->
                     </aside><!-- End .col-lg-3 -->
                 </div><!-- End .row -->
@@ -271,6 +241,32 @@ $(document).on('submit', '#add-to-cart-form', function(event) {
   });
 });
 </script>
+   <script>
+   function filterProducts() {
+  var minPrice = document.getElementById('minPrice').value;
+  var maxPrice = document.getElementById('maxPrice').value;
+
+  // Send AJAX request
+  $.ajax({
+    url: '{% url 'products:filter_products' %}',
+    type: 'GET',
+    data: {
+      minPrice: minPrice,
+      maxPrice: maxPrice
+    },
+    success: function(response) {
+      // Replace the current page content with the received HTML
+      document.open();
+      document.write(response);
+      document.close();
+    },
+    error: function(xhr, textStatus, errorThrown) {
+      // Handle any errors that occur during the AJAX request
+      console.error('Error: ' + errorThrown);
+    }
+  });
+}
+  </script>
 
 
 {% endblock %}

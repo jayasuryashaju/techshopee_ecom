@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.forms import model_to_dict
 from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
 from django.http import HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404, redirect
@@ -21,6 +22,10 @@ import razorpay
 
 
 # Create your views here.
+
+
+def custom_404(request, exception):
+    return render(request, '404.html', context={})
 
 
 @login_required(login_url='account:user_signin')
@@ -128,6 +133,9 @@ def remove_from_cart(request, cart_id):
 @login_required(login_url='account:user_signin')
 def cart_detail(request):
     cart_items = Cart.objects.filter(user=request.user)
+    request.session.pop('coupon', None)
+    request.session.pop('total_cost', None)
+    request.session.modified = True
     total_cost = 0
     for cart_item in cart_items:
         if cart_item.product.selling_price != 0:
@@ -175,8 +183,9 @@ def remove_from_wishlist(request, wishlist_id):
 
 
 def proceed_to_pay(request):
-    global shipping_cost
+    global shipping_cost, discount
     total_price = 0
+    discount = 0.00
     cart_items = Cart.objects.filter(user=request.user)
     total_price = sum(item.get_total_cost() for item in cart_items)
     if 'total_cost' in request.session:
@@ -192,23 +201,43 @@ def proceed_to_pay(request):
             total_price = float(total_price) + float(shipping_cost)
             print('total cost', total_price)
         else:
-            total_cost = float(total_price) + float(shipping_cost)
-            print(total_cost, 'i am 2nd total cost')
+            total_price = float(total_price) + float(shipping_cost)
+            print(total_price, 'i am 2nd total cost')
+    if 'coupon' in request.session:
+        coupon = request.session['coupon']
+        coupon = get_object_or_404(Coupon, code=coupon, active=True, valid_from__lte=timezone.now(),
+                                   valid_to__gte=timezone.now())
+        discount = coupon.discount_value
+        print(discount, 'i am the discount proceed to pay')
     total_price = round(total_price)
     print("total from proceed to pay", total_price)
     return JsonResponse({
 
-        'total_price': total_price
+        'total_price': total_price,
+        'shipping_cost': shipping_cost,
+        'discount': discount,
     })
 
 
 def checkout(request):
     global shipping_cost
-
+    discount = 0.00
     addresses = UserAddress.objects.filter(user=request.user)
     cart_items = Cart.objects.filter(user=request.user)
-    total_cost = sum(item.get_total_cost() for item in cart_items)
+    if 'total_cost' in request.session:
+        total_cost = request.session['total_cost']
+    else:
+        total_cost = sum(item.get_total_cost() for item in cart_items)
 
+    if 'coupon' in request.session:
+        coupon = request.session['coupon']
+        coupon = get_object_or_404(Coupon, code=coupon, active=True, valid_from__lte=timezone.now(),
+                                   valid_to__gte=timezone.now())
+        discount = coupon.discount_value
+
+    coupons = Coupon.objects.all()
+    active_coupon = request.session.get('coupon')
+    print(active_coupon, 'i am the active coupon')
     user = request.user
     form = OrderForm()
     if request.method == 'POST':
@@ -265,6 +294,9 @@ def checkout(request):
             # Save Razorpay order ID to your order object
             order.razorpay_order_id = razorpay_order['id']
             order.save()
+            request.session.pop('coupon', None)
+            request.session.pop('total_cost', None)
+            request.session.modified = True
 
             # Return Razorpay order ID to the frontend
             return JsonResponse({'razorpay_order_id': razorpay_order['id']})
@@ -292,6 +324,9 @@ def checkout(request):
                 product.save()
             cart_items.delete()
             order.save()
+            request.session.pop('coupon', None)
+            request.session.pop('total_cost', None)
+            request.session.modified = True
 
             return redirect('cart:order_list')
 
@@ -301,6 +336,9 @@ def checkout(request):
         'total_cost': total_cost,
         'user': user,
         'form': form,
+        'coupon': coupons,
+        'active_coupon': active_coupon,
+        'discount': discount
 
     }
 
@@ -356,9 +394,16 @@ def order_return(request):
     return JsonResponse({'status': 'Returned'})
 
 
+def get_coupons(request):
+    coupons = Coupon.objects.all()
+    coupon_list = [{'code': coupon.code, 'discount_value': coupon.discount_value} for coupon in coupons]
+    response = {'coupons': coupon_list}
+    return JsonResponse(response)
+
+
 def apply_coupon(request):
     code = request.GET.get('coupon_code')
-    print(code)
+
     # total_cost = float(request.GET.get('total_cost'))
     total_cost = 0
     cart_items = Cart.objects.filter(user=request.user)
@@ -373,23 +418,21 @@ def apply_coupon(request):
         if coupon.maximum_discount and coupon.discount_value > coupon.maximum_discount:
             raise ValidationError('Discount exceeds maximum limit')
         discount_amount = coupon.discount_value
-        # if coupon.discount_type == 'percentage':
-        #     discount_amount = total_cost * (coupon.discount_value / 100)
-        #     if coupon.maximum_discount and discount_amount > coupon.maximum_discount:
-        #         discount_amount = coupon.maximum_discount
         total_cost = float(total_cost) - float(discount_amount)
+        request.session['coupon'] = code
         request.session['total_cost'] = total_cost
         response = {
             'success': True,
             'updated_cost': total_cost,
-            'message': 'Coupon applied successfully'
+            'discount': discount_amount,
+            'messages': 'Coupon applied successfully'
         }
     except (Coupon.DoesNotExist, ValidationError) as e:
         print('im not working')
         response = {
             'success': False,
             'updated_cost': total_cost,
-            'message': str(e)
+            'messages': str(e)
         }
 
     return JsonResponse(response)
@@ -397,12 +440,19 @@ def apply_coupon(request):
 
 def delete_coupon(request):
     code = request.session['coupon']
-    print("coupon code", code)
     request.session.pop('coupon', None)
-    request.session.pop('new_price', None)
-    request.session.pop('coup_discount', None)
+    request.session.pop('total_cost', None)
     request.session.modified = True
-    return redirect(request.META.get('HTTP_REFERER'))
+    total_cost = 0
+    cart_items = Cart.objects.filter(user=request.user)
+    for item in cart_items:
+        total_cost += item.get_total_cost()
+    response = {
+        'success': True,
+        'updated_cost': total_cost,
+        'messages': 'Coupon deleted successfully'
+    }
+    return JsonResponse(response)
 
 
 def generate_invoice(order):
@@ -438,3 +488,228 @@ def download_invoice(request, order_id):
     # Write the PDF content to the response
     response.write(invoice_content.getvalue())
     return response
+
+
+def checkout_buy_now(request):
+    print('i am buynow option and i am working')
+    global shipping_cost
+    discount = 0.00
+    product_id = request.GET.get('product_id')
+    quantity = request.GET.get('quantity')
+    print(product_id, quantity)
+    product = get_object_or_404(Product, id=product_id)
+    addresses = UserAddress.objects.filter(user=request.user)
+    total_cost = float(product.price) * float(quantity)
+
+    if 'coupon' in request.session:
+        coupon = request.session['coupon']
+        coupon = get_object_or_404(Coupon, code=coupon, active=True, valid_from__lte=timezone.now(),
+                                   valid_to__gte=timezone.now())
+        discount = coupon.discount_value
+
+    coupons = Coupon.objects.all()
+    active_coupon = request.session.get('coupon')
+    print(active_coupon, 'i am the active coupon')
+    user = request.user
+    form = OrderForm()
+
+    context = {
+        'addresses': addresses,
+        'product': product,
+        'quantity': quantity,
+        'total_cost': total_cost,
+        'user': user,
+        'form': form,
+        'coupon': coupons,
+        'active_coupon': active_coupon,
+        'discount': discount
+
+    }
+    return render(request, 'checkout_buy_now.html', context)
+
+
+def buy_now(request):
+    if request.method == 'POST':
+        print('this is a post method and it is working')
+
+    global shipping_cost
+    discount = 0.00
+    product_id = request.POST.get('product_id')
+    quantity = request.POST.get('quantity')
+    print(product_id, quantity)
+    product = get_object_or_404(Product, id=product_id)
+    addresses = UserAddress.objects.filter(user=request.user)
+    total_cost = float(product.price) * float(quantity)
+    print(product_id, quantity)
+    if request.method == 'POST':
+        shipping_options = request.POST.get('shipping_options')
+        shipping_address_id = request.POST.get('address')
+
+        if shipping_options == 'free_shipping':
+            shipping_cost = 0.00
+        elif shipping_options == 'faster_shipping':
+            shipping_cost = 100.00
+
+        total_cost += shipping_cost
+
+        payment_method = request.POST['payment_option']
+        shipping_address = UserAddress.objects.get(id=shipping_address_id)
+
+        if payment_method == 'razorpay':
+
+            # Create a new order object but do not save it yet
+            order = Order.objects.create(
+                user=request.user,
+                shipping_address=shipping_address,
+                shipping_cost=shipping_cost,
+                payment_method=payment_method,
+                status=Order.PENDING,
+                total_price=total_cost
+            )
+
+            order_item = OrderItem.objects.create(
+                order=order,
+                product=product,
+                quantity=int(quantity),
+                price=product.price
+            )
+            order_item.save()
+
+            product.stock_quantity -= int(quantity)
+            product.save()
+
+            # Initialize Razorpay client with your account's API key and secret
+            razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_API_KEY, settings.RAZORPAY_API_SECRET))
+
+            # Create a Razorpay order
+            razorpay_order = razorpay_client.order.create({
+                'amount': int(total_cost * 100),  # Razorpay amount is in paisa
+                'currency': 'INR',
+                'payment_capture': '1',  # Auto capture payment
+            })
+
+            # Save Razorpay order ID to your order object
+            order.razorpay_order_id = razorpay_order['id']
+            order.save()
+            request.session.pop('coupon', None)
+            request.session.modified = True
+
+            # Return Razorpay order ID to the frontend
+            return JsonResponse({'razorpay_order_id': razorpay_order['id']})
+        else:
+            order = Order.objects.create(
+                user=request.user,
+                shipping_address=shipping_address,
+                shipping_cost=shipping_cost,
+                payment_method=payment_method,
+                status=Order.PENDING,
+                total_price=total_cost
+            )
+
+            order_item = OrderItem.objects.create(
+                order=order,
+                product=product,
+                quantity=int(quantity),
+                price=product.price
+            )
+            order_item.save()
+
+            product.stock_quantity -= int(quantity)
+            product.save()
+
+            order.save()
+            request.session.pop('coupon', None)
+            request.session.modified = True
+
+            return redirect('cart:order_list')
+
+
+def apply_coupon_buy_now(request):
+    code = request.GET.get('coupon_code')
+    product_id = request.GET.get('product_id')
+    quantity = int(request.GET.get('quantity', 1))
+
+    try:
+        product = get_object_or_404(Product, id=product_id)
+        total_cost = product.price * quantity
+
+        coupon = get_object_or_404(Coupon, code=code, active=True, valid_from__lte=timezone.now(),
+                                   valid_to__gte=timezone.now())
+
+        if coupon.minimum_purchase and total_cost < coupon.minimum_purchase:
+            raise ValidationError('Minimum purchase amount not met')
+
+        if coupon.maximum_discount and coupon.discount_value > coupon.maximum_discount:
+            raise ValidationError('Discount exceeds maximum limit')
+
+        discount_amount = coupon.discount_value
+        total_cost -= discount_amount
+
+        request.session['coupon'] = code
+        request.session['total_cost'] = total_cost
+
+        response = {
+            'success': True,
+            'updated_cost': total_cost,
+            'discount': discount_amount,
+            'message': 'Coupon applied successfully'
+        }
+    except (Product.DoesNotExist, Coupon.DoesNotExist, ValidationError) as e:
+        response = {
+            'success': False,
+            'updated_cost': total_cost,
+            'message': str(e)
+        }
+
+    return JsonResponse(response)
+
+
+def proceed_to_pay_buy_now(request):
+    global shipping_cost, discount
+    total_price = 0
+    discount = 0.00
+
+    product_id = request.GET.get('product_id')
+    quantity = int(request.GET.get('quantity', 1))
+    print(product_id, quantity, 'proceed to pay buy no working ferfect')
+
+    try:
+        product = get_object_or_404(Product, id=product_id)
+
+        total_price = float(product.price) * float(quantity)
+
+        if 'total_cost' in request.session:
+            total_price = request.session['total_cost']
+
+        if request.GET.get('shipping_options'):
+            shipping_options = request.GET.get('shipping_options')
+            if shipping_options == 'free_shipping':
+                shipping_cost = 0.00
+            elif shipping_options == 'faster_shipping':
+                shipping_cost = 100.00
+
+            if 'total_cost' in request.session:
+                total_price = request.session['total_cost']
+                total_price += float(shipping_cost)
+            else:
+                total_price += float(shipping_cost)
+
+        if 'coupon' in request.session:
+            coupon = request.session['coupon']
+            coupon = get_object_or_404(Coupon, code=coupon, active=True, valid_from__lte=timezone.now(),
+                                       valid_to__gte=timezone.now())
+            discount = coupon.discount_value
+
+        total_price = round(total_price)
+
+        response = {
+            'total_price': total_price,
+            'shipping_cost': shipping_cost,
+            'discount': discount,
+        }
+    except (Product.DoesNotExist, Coupon.DoesNotExist) as e:
+        response = {
+            'error': str(e)
+        }
+
+    return JsonResponse(response)

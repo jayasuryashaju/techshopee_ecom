@@ -242,27 +242,27 @@
                 </div><!-- End .container -->
             </div><!-- End .icon-boxes-container -->
 
-        	<div class="footer-newsletter bg-image" style="background-image: url({% static 'assets/images/backgrounds/bg-2.jpg' %})">
-        		<div class="container">
-        			<div class="heading text-center">
-                        <h3 class="title">Get The Latest Deals</h3><!-- End .title -->
-                        <p class="title-desc">and receive <span>$20 coupon</span> for first shopping</p><!-- End .title-desc -->
-                    </div><!-- End .heading -->
-
-                    <div class="row">
-                    	<div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-6 offset-lg-3">
-                            <form action="#">
-    							<div class="input-group">
-    								<input type="email" class="form-control" placeholder="Enter your Email Address" aria-label="Email Adress" aria-describedby="newsletter-btn" required>
-    								<div class="input-group-append">
-    									<button class="btn btn-primary" type="submit" id="newsletter-btn"><span>Subscribe</span><i class="icon-long-arrow-right"></i></button>
-    								</div><!-- .End .input-group-append -->
-    							</div><!-- .End .input-group -->
-                            </form>
-                    	</div><!-- End .col-sm-10 offset-sm-1 col-lg-6 offset-lg-3 -->
-                    </div><!-- End .row -->
-        		</div><!-- End .container -->
-        	</div><!-- End .footer-newsletter bg-image -->
+{#        	<div class="footer-newsletter bg-image" style="background-image: url({% static 'assets/images/backgrounds/bg-2.jpg' %})">#}
+{#        		<div class="container">#}
+{#        			<div class="heading text-center">#}
+{#                        <h3 class="title">Get The Latest Deals</h3><!-- End .title -->#}
+{#                        <p class="title-desc">and receive <span>$20 coupon</span> for first shopping</p><!-- End .title-desc -->#}
+{#                    </div><!-- End .heading -->#}
+{##}
+{#                    <div class="row">#}
+{#                    	<div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-6 offset-lg-3">#}
+{#                            <form action="#">#}
+{#    							<div class="input-group">#}
+{#    								<input type="email" class="form-control" placeholder="Enter your Email Address" aria-label="Email Adress" aria-describedby="newsletter-btn" required>#}
+{#    								<div class="input-group-append">#}
+{#    									<button class="btn btn-primary" type="submit" id="newsletter-btn"><span>Subscribe</span><i class="icon-long-arrow-right"></i></button>#}
+{#    								</div><!-- .End .input-group-append -->#}
+{#    							</div><!-- .End .input-group -->#}
+{#                            </form>#}
+{#                    	</div><!-- End .col-sm-10 offset-sm-1 col-lg-6 offset-lg-3 -->#}
+{#                    </div><!-- End .row -->#}
+{#        		</div><!-- End .container -->#}
+{#        	</div><!-- End .footer-newsletter bg-image -->#}
 
         	<div class="footer-middle">
 	            <div class="container">
@@ -294,9 +294,6 @@
 	            				<h4 class="widget-title">Information</h4><!-- End .widget-title -->
 
 	            				<ul class="widget-list">
-	            					<li><a href="about.html">About Molla</a></li>
-	            					<li><a href="#">How to shop on Molla</a></li>
-	            					<li><a href="#">FAQ</a></li>
 	            					<li><a href="contact.html">Contact us</a></li>
 	            					<li><a href="login.html">Log in</a></li>
 	            				</ul><!-- End .widget-list -->
@@ -323,11 +320,9 @@
 	            				<h4 class="widget-title">My Account</h4><!-- End .widget-title -->
 
 	            				<ul class="widget-list">
-	            					<li><a href="#">Sign In</a></li>
-	            					<li><a href="cart.html">View Cart</a></li>
-	            					<li><a href="#">My Wishlist</a></li>
-	            					<li><a href="#">Track My Order</a></li>
-	            					<li><a href="#">Help</a></li>
+	            					<li><a href="{% url 'account:user_signin' %}">Sign In</a></li>
+	            					<li><a href="{% url 'cart:cart_detail' %}">View Cart</a></li>
+	            					<li><a href="{% url 'cart:wishlist_detail' %}">My Wishlist</a></li>
 	            				</ul><!-- End .widget-list -->
 	            			</div><!-- End .widget -->
 	            		</div><!-- End .col-sm-64 col-lg-3 -->
@@ -337,7 +332,7 @@
 
 	        <div class="footer-bottom">
 	        	<div class="container">
-	        		<p class="footer-copyright">Copyright © 2019 Molla Store. All Rights Reserved.</p><!-- End .footer-copyright -->
+	        		<p class="footer-copyright">Copyright © 2023 TechShopee Store. All Rights Reserved.</p><!-- End .footer-copyright -->
 	        		<ul class="footer-menu">
 	        			<li><a href="#">Terms Of Use</a></li>
 	        			<li><a href="#">Privacy Policy</a></li>
@@ -371,9 +366,9 @@
                     <div class="mobile-menu-wrapper">
                         <span class="mobile-menu-close"><i class="icon-close"></i></span>
                         
-                        <form action="#" method="get" class="mobile-search">
+                        <form action="{% url 'homelog:search' %}" method="get" class="mobile-search">
                             <label for="mobile-search" class="sr-only">Search</label>
-                            <input type="search" class="form-control" name="mobile-search" id="mobile-search" placeholder="Search product ..." required>
+                            <input type="search" class="form-control" name="gsearch" id="mobile-search" placeholder="Search product ..." required>
                             <button class="btn btn-primary" type="submit"><i class="icon-search"></i></button>
                         </form>
             
